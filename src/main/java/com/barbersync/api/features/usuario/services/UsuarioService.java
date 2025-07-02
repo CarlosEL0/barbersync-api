@@ -6,9 +6,13 @@ import com.barbersync.api.features.usuario.dto.UsuarioRequest;
 
 public interface UsuarioService {
 
-    UsuarioResponse crearUsuario(UsuarioRequest usuarioResquest);
+    UsuarioResponse crearUsuario(UsuarioRequest usuarioRequest);
 
     UsuarioResponse obtenerUsuarioPorId(Integer id);
 
     List<UsuarioResponse> obtenerUsuarios();
+
+    UsuarioResponse actualizarUsuario(Integer id, UsuarioRequest usuarioRequest);
+
+    void eliminarUsuario(Integer id);
 }
