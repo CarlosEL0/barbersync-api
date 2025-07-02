@@ -1,4 +1,22 @@
 package com.barbersync.api.features.cita.dto;
 
+import com.barbersync.api.features.usuario.Usuario;
+import lombok.Data;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Data
+
 public class CitaResponse {
+
+    private Integer id;
+    private LocalDate fecha;
+    private LocalTime hora;
+    private String estado;
+    private Integer idCliente;
+    private Integer idBarbero;
+    private Integer duracionTotalMinutos;
+
+    public void setIdCliente(Usuario idCliente) {
+    }
 }

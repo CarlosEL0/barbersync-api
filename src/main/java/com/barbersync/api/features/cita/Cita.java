@@ -5,6 +5,7 @@ import com.barbersync.api.features.cita.entities.EstadoCita;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.Data;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -13,7 +14,7 @@ import java.time.LocalTime;
 @Table(name = "cita")
 
 public class Cita {
-    @Id
+   @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -23,15 +24,15 @@ public class Cita {
 
     @ManyToOne
     @JoinColumn(name = "id_estado_cita", referencedColumnName = "id")
-    private EstadoCita estadoCita;
+    private EstadoCita idEstadoCita;
 
     @ManyToOne
     @JoinColumn(name = "id_cliente", referencedColumnName = "id")
-    private Usuario idCliente;
+    private Usuario Idcliente;
 
     @ManyToOne
     @JoinColumn(name = "id_barbero", referencedColumnName = "id")
-    private Usuario barbero;
+    private Usuario idBarbero;
 
 
     @Column(name = "duracion_total_minutos")

@@ -2,12 +2,13 @@ package com.barbersync.api.features.servicio;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.math.BigDecimal;
 
 @Entity
 @Data
 @Table(name = "servicio")
 
-public class Servicios {
+public class Servicio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +18,7 @@ public class Servicios {
 
     private String descripcion;
 
-    private double precio;
+    private BigDecimal precio;
 
     @Column(name = "duracion_minuto")
     private Integer duracionMinuto;

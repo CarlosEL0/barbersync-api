@@ -38,7 +38,7 @@ public class Usuario {
     @JoinColumn(name = "rol_id", referencedColumnName = "id")
     private Rol rol;
 
-    // ✅ Agrega este método auxiliar si solo tienes el ID del rol
+    //método auxiliar si solo tienes el ID del rol
     public void setRolId(Integer rolId) {
         if (this.rol == null) {
             this.rol = new Rol();

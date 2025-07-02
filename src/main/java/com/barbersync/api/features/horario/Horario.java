@@ -1,5 +1,6 @@
 package com.barbersync.api.features.horario;
 
+import com.barbersync.api.features.horario.entities.TiempoSesion;
 import jakarta.persistence.*;
 import lombok.Data;
 import com.barbersync.api.features.usuario.Usuario;
@@ -27,5 +28,5 @@ public class Horario {
 
     @OneToOne
     @JoinColumn(name = "id_tiempo_sesion", referencedColumnName = "id")
-    private Horario tiempoSesion;
+    private TiempoSesion tiempoSesion;
 }

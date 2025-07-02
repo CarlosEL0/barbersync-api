@@ -3,6 +3,7 @@ package com.barbersync.api.features.resena;
 import java.time.LocalDate;
 import lombok.Data;
 import jakarta.persistence.*;
+import com.barbersync.api.features.usuario.Usuario;
 
 @Entity
 @Data
@@ -23,9 +24,9 @@ public class Resena {
 
     @ManyToOne
     @JoinColumn(name = "id_cliente", referencedColumnName = "id")
-    private Resena idCliente;
+    private Usuario idCliente;
 
     @ManyToOne
     @JoinColumn(name = "id_barbero", referencedColumnName = "id")
-    private Resena idBarbero;
+    private Usuario idBarbero;
 }

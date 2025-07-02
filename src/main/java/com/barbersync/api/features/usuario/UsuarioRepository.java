@@ -1,6 +1,5 @@
 package com.barbersync.api.features.usuario;
 
-import com.barbersync.api.features.usuario.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
