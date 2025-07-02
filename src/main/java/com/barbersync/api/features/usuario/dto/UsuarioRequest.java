@@ -1,7 +1,7 @@
 package com.barbersync.api.features.usuario.dto;
 
 import lombok.Data;
-
+//
 @Data
 
 public class UsuarioRequest {
