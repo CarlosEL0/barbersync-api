@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class RolResponse {
     private Integer id;
-    private String rol;
+    private String nombre;
 }

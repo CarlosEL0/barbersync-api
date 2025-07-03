@@ -1,39 +1,44 @@
-package com.barbersync.api.features.usuario;
+package com.barbersync.api.features.rol;
 
-import com.barbersync.api.features.usuario.dto.UsuarioRequest;
-import com.barbersync.api.features.usuario.dto.UsuarioResponse;
-import com.barbersync.api.features.usuario.services.UsuarioService;
-import org.springframework.http.ResponseEntity;
+import com.barbersync.api.features.rol.dto.RolRequest;
+import com.barbersync.api.features.rol.dto.RolResponse;
+import com.barbersync.api.features.rol.services.RolService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/usuarios")
-public class UsuarioController {
+@RequestMapping("/api/roles")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173") // Svelte/Vite
+public class RolController {
 
-    private final UsuarioService usuarioService;
+    private final RolService rolService;
 
-    public UsuarioController(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
+    @PostMapping
+    public RolResponse crearRol(@RequestBody @Valid RolRequest request) {
+        return rolService.crearRol(request);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioResponse> getById(@PathVariable Integer id) {
-        return ResponseEntity.ok(usuarioService.obtenerUsuarioPorId(id));
+    public RolResponse obtenerPorId(@PathVariable Integer id) {
+        return rolService.obtenerPorId(id);
     }
 
-    @PostMapping
-    public ResponseEntity<UsuarioResponse> create(@RequestBody UsuarioRequest request) {
-        return ResponseEntity.ok(usuarioService.crearUsuario(request));
+    @GetMapping
+    public List<RolResponse> obtenerTodos() {
+        return rolService.obtenerTodos();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioResponse> update(@PathVariable Integer id, @RequestBody UsuarioRequest request) {
-        return ResponseEntity.ok(usuarioService.actualizarUsuario(id, request));
+    public RolResponse actualizarRol(@PathVariable Integer id, @RequestBody @Valid RolRequest request) {
+        return rolService.actualizarRol(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        usuarioService.eliminarUsuario(id);
-        return ResponseEntity.noContent().build();
+    public void eliminarRol(@PathVariable Integer id) {
+        rolService.eliminarRol(id);
     }
 }
