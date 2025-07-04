@@ -1,8 +1,8 @@
-package com.barbersync.api.features.rol;
+package com.barbersync.api.features.usuario;
 
-import com.barbersync.api.features.rol.dto.RolRequest;
-import com.barbersync.api.features.rol.dto.RolResponse;
-import com.barbersync.api.features.rol.services.RolService;
+import com.barbersync.api.features.usuario.dto.UsuarioRequest;
+import com.barbersync.api.features.usuario.dto.UsuarioResponse;
+import com.barbersync.api.features.usuario.services.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -10,35 +10,35 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/roles")
+@RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173") // Svelte/Vite
-public class RolController {
+public class UsuarioController {
 
-    private final RolService rolService;
+    private final UsuarioService usuarioService;
 
     @PostMapping
-    public RolResponse crearRol(@RequestBody @Valid RolRequest request) {
-        return rolService.crearRol(request);
+    public UsuarioResponse crearUsuario(@RequestBody @Valid UsuarioRequest request) {
+        return usuarioService.crearUsuario(request);
     }
 
     @GetMapping("/{id}")
-    public RolResponse obtenerPorId(@PathVariable Integer id) {
-        return rolService.obtenerPorId(id);
+    public UsuarioResponse obtenerUsuarioPorId(@PathVariable Integer id) {
+        return usuarioService.obtenerUsuarioPorId(id);
     }
 
     @GetMapping
-    public List<RolResponse> obtenerTodos() {
-        return rolService.obtenerTodos();
+    public List<UsuarioResponse> obtenerUsuarios() {
+        return usuarioService.obtenerUsuarios();
     }
 
     @PutMapping("/{id}")
-    public RolResponse actualizarRol(@PathVariable Integer id, @RequestBody @Valid RolRequest request) {
-        return rolService.actualizarRol(id, request);
+    public UsuarioResponse actualizarUsuario(@PathVariable Integer id, @RequestBody @Valid UsuarioRequest request) {
+        return usuarioService.actualizarUsuario(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public void eliminarRol(@PathVariable Integer id) {
-        rolService.eliminarRol(id);
+    public void eliminarUsuario(@PathVariable Integer id) {
+        usuarioService.eliminarUsuario(id);
     }
 }
