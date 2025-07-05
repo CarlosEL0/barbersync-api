@@ -14,7 +14,7 @@ public class CitaServicio {
     private CitaServicioId id;
 
     @ManyToOne
-    @MapsId("idCita") // Indica que se mapea con la parte de la clave compuesta
+    @MapsId("idCita")
     @JoinColumn(name = "id_cita")
     private Cita cita;
 

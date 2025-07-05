@@ -1,20 +1,16 @@
 package com.barbersync.api.features.barbero.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
-@Entity
 @Data
+@Entity
+@Table(name = "especialidad")
 public class Especialidad {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String especialidad;
-
-    private String descripcion;
+    private String nombre;
 }

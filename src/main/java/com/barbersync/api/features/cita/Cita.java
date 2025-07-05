@@ -13,26 +13,26 @@ import java.time.LocalTime;
 @Table(name = "cita")
 public class Cita {
 
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
- private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
- private LocalDate fecha;
+    private LocalDate fecha;
 
- private LocalTime hora;
+    private LocalTime hora;
 
- @ManyToOne
- @JoinColumn(name = "id_estado_cita", referencedColumnName = "id")
- private EstadoCita estadoCita;
+    @ManyToOne
+    @JoinColumn(name = "id_estado_cita", referencedColumnName = "id")
+    private EstadoCita estadoCita;
 
- @ManyToOne
- @JoinColumn(name = "id_cliente", referencedColumnName = "id")
- private Usuario cliente;
+    @ManyToOne
+    @JoinColumn(name = "id_cliente", referencedColumnName = "id")
+    private Usuario cliente;
 
- @ManyToOne
- @JoinColumn(name = "id_barbero", referencedColumnName = "id")
- private Usuario barbero;
+    @ManyToOne
+    @JoinColumn(name = "id_barbero", referencedColumnName = "id")
+    private Usuario barbero;
 
- @Column(name = "duracion_total_minutos")
- private Integer duracionTotalMinutos;
+    @Column(name = "duracion_total_minutos")
+    private Integer duracionTotalMinutos;
 }
