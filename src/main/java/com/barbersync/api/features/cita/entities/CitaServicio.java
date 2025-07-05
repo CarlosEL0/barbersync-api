@@ -1,25 +1,25 @@
 package com.barbersync.api.features.cita.entities;
 
-import com.barbersync.api.features.servicio.Servicio;
 import com.barbersync.api.features.cita.Cita;
+import com.barbersync.api.features.servicio.Servicio;
 import jakarta.persistence.*;
 import lombok.Data;
 
-@Entity
 @Data
+@Entity
 @Table(name = "cita_servicio")
-
 public class CitaServicio {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @EmbeddedId
+    private CitaServicioId id;
 
     @ManyToOne
-    @JoinColumn(name = "id_cita", referencedColumnName = "id")
-    private Cita idCita;
+    @MapsId("idCita") // Indica que se mapea con la parte de la clave compuesta
+    @JoinColumn(name = "id_cita")
+    private Cita cita;
 
     @ManyToOne
-    @JoinColumn(name = "id_servicio", referencedColumnName = "id")
-    private Servicio idServicio;
+    @MapsId("idServicio")
+    @JoinColumn(name = "id_servicio")
+    private Servicio servicio;
 }

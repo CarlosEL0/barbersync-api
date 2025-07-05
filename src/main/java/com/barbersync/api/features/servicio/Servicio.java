@@ -2,12 +2,12 @@ package com.barbersync.api.features.servicio;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.math.BigDecimal;
 
-@Entity
 @Data
+@Entity
 @Table(name = "servicio")
-
 public class Servicio {
 
     @Id
@@ -20,10 +20,6 @@ public class Servicio {
 
     private BigDecimal precio;
 
-    @Column(name = "duracion_minuto")
+    @Column(name = "duracion_minutos") // Nombre real según SQL
     private Integer duracionMinuto;
-
-
-
-
 }

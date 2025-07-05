@@ -13,20 +13,13 @@ import java.util.List;
 public interface CitaRepository extends JpaRepository<Cita, Integer> {
 
     List<Cita> findByFecha(LocalDate fecha);
-
     List<Cita> findByHora(LocalTime hora);
 
-    List<Cita> findByIdCliente(Usuario cliente);
+    List<Cita> findByCliente(Usuario cliente);
+    List<Cita> findByBarbero(Usuario barbero);
+    List<Cita> findByEstadoCita(EstadoCita estado);
 
-    List<Cita> findByIdBarbero(Usuario barbero);
-
-    List<Cita> findByIdEstadoCita(EstadoCita estado);
-
-    List<Cita> findByIdBarberoAndFecha(Usuario barbero, LocalDate fecha);
-
-    List<Cita> findByIdClienteAndFecha(Usuario cliente, LocalDate fecha);
-
+    List<Cita> findByClienteAndFecha(Usuario cliente, LocalDate fecha);
     List<Cita> findByFechaBetween(LocalDate inicio, LocalDate fin);
-
-    List<Cita> findByIdBarberoAndFechaBetween(Usuario barbero, LocalDate inicio, LocalDate fin);
+    List<Cita> findByBarberoAndFechaBetween(Usuario barbero, LocalDate inicio, LocalDate fin);
 }

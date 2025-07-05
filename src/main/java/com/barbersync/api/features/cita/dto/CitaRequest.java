@@ -6,12 +6,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
-
 public class CitaRequest {
 
     private Integer idCliente;
     private Integer idBarbero;
+    private Integer estadoCitaId;
     private LocalDate fecha;
     private LocalTime hora;
-
 }
