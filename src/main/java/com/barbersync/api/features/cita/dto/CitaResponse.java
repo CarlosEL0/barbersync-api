@@ -7,7 +7,6 @@ import java.time.LocalTime;
 
 @Data
 public class CitaResponse {
-
     private Integer id;
     private LocalDate fecha;
     private LocalTime hora;
@@ -15,4 +14,7 @@ public class CitaResponse {
     private Integer idCliente;
     private Integer idBarbero;
     private Integer duracionTotalMinutos;
+    private String nombreCliente;      // ✅ nuevo
+    private String nombreBarbero;      // ✅ nuevo
 }
+

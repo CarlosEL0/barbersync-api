@@ -1,16 +1,18 @@
 package com.barbersync.api.features.cita.dto;
 
 import lombok.Data;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 public class CitaRequest {
-
     private Integer idCliente;
     private Integer idBarbero;
     private Integer estadoCitaId;
     private LocalDate fecha;
     private LocalTime hora;
+
+    private List<Integer> idServicios; // ✅ nuevo campo importante
 }
+

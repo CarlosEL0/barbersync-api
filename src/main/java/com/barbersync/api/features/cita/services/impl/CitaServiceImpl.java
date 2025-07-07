@@ -12,6 +12,11 @@ import com.barbersync.api.features.usuario.UsuarioRepository;
 import com.barbersync.api.shared.exceptions.RecursoNoEncontradoException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.barbersync.api.features.servicio.Servicio;
+import com.barbersync.api.features.servicio.ServicioRepository;
+import com.barbersync.api.features.cita.entities.CitaServicio;
+import com.barbersync.api.features.cita.entities.CitaServicioId;
+import com.barbersync.api.features.cita.CitaServicioRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,7 +24,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CitaServiceImpl implements CitaService {
-
+    private final ServicioRepository servicioRepository;
+    private final CitaServicioRepository citaServicioRepository;
     private final CitaRepository citaRepository;
     private final UsuarioRepository usuarioRepository;
 
@@ -40,15 +46,43 @@ public class CitaServiceImpl implements CitaService {
                 .findFirst()
                 .orElseThrow(() -> new RecursoNoEncontradoException("Estado de cita inválido"));
 
+        // Crear cita base
         Cita cita = CitaMapper.toEntity(request);
         cita.setCliente(cliente);
         cita.setBarbero(barbero);
         cita.setEstadoCita(estado);
-        cita.setDuracionTotalMinutos(0); // Se puede calcular luego
+        cita.setDuracionTotalMinutos(0); // inicial
 
+        // Guardar para obtener ID
         cita = citaRepository.save(cita);
+
+        // Obtener servicios por ID
+        var servicios = servicioRepository.findAllById(request.getIdServicios());
+
+        // Calcular duración y registrar cita_servicio
+        int duracionTotal = 0;
+        for (Servicio servicio : servicios) {
+            CitaServicioId id = new CitaServicioId();
+            id.setIdCita(cita.getId());
+            id.setIdServicio(servicio.getId());
+
+            CitaServicio cs = new CitaServicio();
+            cs.setId(id);
+            cs.setCita(cita);
+            cs.setServicio(servicio);
+
+            citaServicioRepository.save(cs);
+
+            duracionTotal += servicio.getDuracionMinuto(); // campo real de la entidad
+        }
+
+        // Actualizar duración total
+        cita.setDuracionTotalMinutos(duracionTotal);
+        cita = citaRepository.save(cita);
+
         return CitaMapper.toResponse(cita);
     }
+
 
     @Override
     public CitaResponse obtenerPorId(Integer id) {

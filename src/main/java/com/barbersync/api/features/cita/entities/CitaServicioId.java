@@ -11,3 +11,4 @@ public class CitaServicioId implements Serializable {
     private Integer idCita;
     private Integer idServicio;
 }
+

@@ -12,14 +12,23 @@ public class CitaMapper {
         response.setHora(cita.getHora());
         response.setDuracionTotalMinutos(cita.getDuracionTotalMinutos());
 
-        if (cita.getCliente() != null)
+        if (cita.getCliente() != null) {
             response.setIdCliente(cita.getCliente().getId());
+            response.setNombreCliente(
+                    cita.getCliente().getPrimerNombre() + " " + cita.getCliente().getPrimerApellido()
+            );
+        }
 
-        if (cita.getBarbero() != null)
+        if (cita.getBarbero() != null) {
             response.setIdBarbero(cita.getBarbero().getId());
+            response.setNombreBarbero(
+                    cita.getBarbero().getPrimerNombre() + " " + cita.getBarbero().getPrimerApellido()
+            );
+        }
 
-        if (cita.getEstadoCita() != null)
+        if (cita.getEstadoCita() != null) {
             response.setEstado(cita.getEstadoCita().getNombreEstado());
+        }
 
         return response;
     }
