@@ -1,10 +1,10 @@
 package com.barbersync.api.features.barbero.services.impl;
 
-import com.barbersync.api.features.barbero.BarberoEspecialidadRepository;
-import com.barbersync.api.features.barbero.EspecialidadRepository;
+import com.barbersync.api.features.barbero.repositories.BarberoEspecialidadRepository;
+import com.barbersync.api.features.barbero.repositories.EspecialidadRepository;
 import com.barbersync.api.features.barbero.dto.*;
 import com.barbersync.api.features.barbero.entities.*;
-import com.barbersync.api.features.barbero.services.BarberoEspecialidadService;
+import com.barbersync.api.features.barbero.services.IBarberoEspecialidadService;
 import com.barbersync.api.features.usuario.Usuario;
 import com.barbersync.api.features.usuario.UsuarioRepository;
 import com.barbersync.api.shared.exceptions.RecursoNoEncontradoException;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class BarberoEspecialidadServiceImpl implements BarberoEspecialidadService {
+public class BarberoEspecialidadServiceImpl implements IBarberoEspecialidadService {
 
     private final BarberoEspecialidadRepository barberoEspecialidadRepository;
     private final EspecialidadRepository especialidadRepository;

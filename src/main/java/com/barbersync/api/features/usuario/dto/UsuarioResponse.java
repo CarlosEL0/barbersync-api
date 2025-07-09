@@ -1,8 +1,11 @@
 package com.barbersync.api.features.usuario.dto;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class UsuarioResponse {
     private Integer id;
     private String primerNombre;

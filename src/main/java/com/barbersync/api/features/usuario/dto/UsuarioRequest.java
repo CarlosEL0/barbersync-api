@@ -2,9 +2,12 @@ package com.barbersync.api.features.usuario.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class UsuarioRequest {
 
     @NotBlank(message = "El primer nombre es obligatorio")

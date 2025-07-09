@@ -1,7 +1,7 @@
 package com.barbersync.api.features.barbero;
 
 import com.barbersync.api.features.barbero.dto.*;
-import com.barbersync.api.features.barbero.services.BarberoEspecialidadService;
+import com.barbersync.api.features.barbero.services.IBarberoEspecialidadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BarberoEspecialidadController {
 
-    private final BarberoEspecialidadService service;
+    private final IBarberoEspecialidadService service;
 
     @PostMapping
     public ResponseEntity<Void> asignarEspecialidades(@RequestBody BarberoEspecialidadRequest request) {

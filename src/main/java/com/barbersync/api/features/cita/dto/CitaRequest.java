@@ -2,12 +2,16 @@ package com.barbersync.api.features.cita.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-@Data
+@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class CitaRequest {
 
     @NotNull(message = "El ID del cliente es obligatorio.")

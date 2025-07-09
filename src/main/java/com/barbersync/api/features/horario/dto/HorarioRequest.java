@@ -1,10 +1,14 @@
 package com.barbersync.api.features.horario.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.*;
+
 import java.time.LocalTime;
 
-@Data
+@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class HorarioRequest {
     @NotNull(message = "El ID del barbero es obligatorio")
     private Integer idBarbero;

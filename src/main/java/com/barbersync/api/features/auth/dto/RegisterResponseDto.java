@@ -1,10 +1,11 @@
 package com.barbersync.api.features.auth.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
-@Data
 @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class RegisterResponseDto {
     private String mensaje;
 }

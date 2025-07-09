@@ -1,10 +1,13 @@
 package com.barbersync.api.features.servicio.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
+@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class ServicioResponse {
     private Integer id;
     private String nombre;

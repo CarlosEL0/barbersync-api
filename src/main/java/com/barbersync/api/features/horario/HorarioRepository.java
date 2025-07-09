@@ -1,6 +1,5 @@
 package com.barbersync.api.features.horario;
 
-import com.barbersync.api.features.horario.Horario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

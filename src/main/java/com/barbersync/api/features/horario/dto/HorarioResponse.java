@@ -1,9 +1,13 @@
 package com.barbersync.api.features.horario.dto;
 
-import lombok.Data;
+import lombok.*;
+
 import java.time.LocalTime;
 
-@Data
+@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class HorarioResponse {
     private Integer id;
     private Integer idBarbero;

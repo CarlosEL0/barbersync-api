@@ -1,11 +1,15 @@
 package com.barbersync.api.features.cita.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Data
+
+@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class CitaResponse {
     private Integer id;
     private LocalDate fecha;

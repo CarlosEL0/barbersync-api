@@ -1,4 +1,4 @@
-package com.barbersync.api.features.barbero;
+package com.barbersync.api.features.barbero.repositories;
 
 import com.barbersync.api.features.barbero.entities.Especialidad;
 import org.springframework.data.jpa.repository.JpaRepository;

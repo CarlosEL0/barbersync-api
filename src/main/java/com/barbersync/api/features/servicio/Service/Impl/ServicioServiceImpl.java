@@ -1,4 +1,4 @@
-package com.barbersync.api.features.servicio.services.impl;
+package com.barbersync.api.features.servicio.Service.Impl;
 
 import com.barbersync.api.features.servicio.*;
 import com.barbersync.api.features.servicio.dto.ServicioRequest;
