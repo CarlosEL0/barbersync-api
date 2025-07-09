@@ -9,5 +9,6 @@ public interface ResenaService {
     ResenaResponse crear(ResenaRequest request);
     ResenaResponse obtenerPorId(Integer id);
     List<ResenaResponse> obtenerTodas();
+    ResenaResponse actualizar(Integer id, ResenaRequest request);  // Método para actualizar
     void eliminar(Integer id);
 }

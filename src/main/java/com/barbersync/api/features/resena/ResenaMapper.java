@@ -12,17 +12,18 @@ public class ResenaMapper {
         dto.setComentario(resena.getComentario());
         dto.setFechaResena(resena.getFechaResena());
 
-        if (resena.getIdCliente() != null) {
+        // Usamos los nuevos nombres de las propiedades (cliente y barbero)
+        if (resena.getCliente() != null) {
             dto.setNombreCliente(
-                    resena.getIdCliente().getPrimerNombre() + " " +
-                            resena.getIdCliente().getPrimerApellido()
+                    resena.getCliente().getPrimerNombre() + " " +
+                            resena.getCliente().getPrimerApellido()
             );
         }
 
-        if (resena.getIdBarbero() != null) {
+        if (resena.getBarbero() != null) {
             dto.setNombreBarbero(
-                    resena.getIdBarbero().getPrimerNombre() + " " +
-                            resena.getIdBarbero().getPrimerApellido()
+                    resena.getBarbero().getPrimerNombre() + " " +
+                            resena.getBarbero().getPrimerApellido()
             );
         }
 

@@ -11,5 +11,6 @@ public class Rol {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String nombre;
+    @Column(name = "rol") // Actualizado para reflejar el nombre correcto de la columna en la base de datos
+    private String rol;  // Cambiado de 'nombre' a 'rol'
 }

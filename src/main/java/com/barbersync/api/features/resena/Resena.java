@@ -8,7 +8,6 @@ import com.barbersync.api.features.usuario.Usuario;
 @Entity
 @Data
 @Table(name = "resena")
-
 public class Resena {
 
     @Id
@@ -24,9 +23,9 @@ public class Resena {
 
     @ManyToOne
     @JoinColumn(name = "id_cliente", referencedColumnName = "id")
-    private Usuario idCliente;
+    private Usuario cliente;  // Renombrado de idCliente a cliente
 
     @ManyToOne
     @JoinColumn(name = "id_barbero", referencedColumnName = "id")
-    private Usuario idBarbero;
+    private Usuario barbero;  // Renombrado de idBarbero a barbero
 }

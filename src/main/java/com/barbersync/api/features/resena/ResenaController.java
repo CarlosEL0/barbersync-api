@@ -31,6 +31,11 @@ public class ResenaController {
         return ResponseEntity.ok(resenaService.obtenerTodas());
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ResenaResponse> actualizar(@PathVariable Integer id, @RequestBody ResenaRequest request) {
+        return ResponseEntity.ok(resenaService.actualizar(id, request));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         resenaService.eliminar(id);

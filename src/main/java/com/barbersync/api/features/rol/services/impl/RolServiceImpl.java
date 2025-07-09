@@ -21,7 +21,7 @@ public class RolServiceImpl implements RolService {
     @Override
     public RolResponse crearRol(RolRequest request) {
         Rol rol = new Rol();
-        rol.setNombre(request.getNombre());
+        rol.setRol(request.getRol());
         rol = rolRepository.save(rol);
         return mapToResponse(rol);
     }
@@ -45,7 +45,7 @@ public class RolServiceImpl implements RolService {
         Rol rol = rolRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Rol no encontrado con ID: " + id));
 
-        rol.setNombre(request.getNombre());
+        rol.setRol(request.getRol());
         rol = rolRepository.save(rol);
         return mapToResponse(rol);
     }
@@ -58,7 +58,7 @@ public class RolServiceImpl implements RolService {
     private RolResponse mapToResponse(Rol rol) {
         RolResponse response = new RolResponse();
         response.setId(rol.getId());
-        response.setNombre(rol.getNombre());
+        response.setRol(rol.getRol());
         return response;
     }
 }

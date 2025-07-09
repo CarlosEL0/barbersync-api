@@ -9,18 +9,19 @@ public class RolMapper {
 
     public Rol toEntity(RolRequest request) {
         Rol rol = new Rol();
-        rol.setNombre(request.getNombre());
+        rol.setRol(request.getRol());  // Cambiado de setNombre a setRol
         return rol;
     }
 
     public RolResponse toResponse(Rol rol) {
         RolResponse response = new RolResponse();
         response.setId(rol.getId());
-        response.setNombre(rol.getNombre());
+        response.setRol(rol.getRol());  // Cambiado de getNombre a getRol
         return response;
     }
 
     public void updateEntityFromRequest(Rol rol, RolRequest request) {
-        rol.setNombre(request.getNombre());
+        rol.setRol(request.getRol());  // Cambiado de setNombre a setRol
     }
 }
+

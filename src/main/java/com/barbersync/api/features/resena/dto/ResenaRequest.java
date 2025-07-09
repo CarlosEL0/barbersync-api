@@ -16,7 +16,7 @@ public class ResenaRequest {
 
     @NotBlank
     private String comentario;
-    
+
     private Integer idCliente;
     private Integer idBarbero;
 }

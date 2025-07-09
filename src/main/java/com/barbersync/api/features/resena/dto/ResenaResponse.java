@@ -2,8 +2,8 @@ package com.barbersync.api.features.resena.dto;
 
 import lombok.Data;
 import java.time.LocalDate;
-@Data
 
+@Data
 public class ResenaResponse {
 
     private Integer id;
