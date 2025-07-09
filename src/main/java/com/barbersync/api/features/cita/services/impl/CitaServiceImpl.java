@@ -17,7 +17,7 @@ import com.barbersync.api.features.servicio.ServicioRepository;
 import com.barbersync.api.features.cita.entities.CitaServicio;
 import com.barbersync.api.features.cita.entities.CitaServicioId;
 import com.barbersync.api.features.cita.CitaServicioRepository;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -98,7 +98,9 @@ public class CitaServiceImpl implements CitaService {
                 .collect(Collectors.toList());
     }
 
+
     @Override
+    @Transactional
     public CitaResponse actualizar(Integer id, CitaRequest request) {
         Cita cita = citaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Cita no encontrada"));
@@ -118,12 +120,49 @@ public class CitaServiceImpl implements CitaService {
         cita.setFecha(request.getFecha());
         cita.setHora(request.getHora());
 
+        // Recalcular duración total de la cita
+        List<Servicio> servicios = servicioRepository.findAllById(request.getIdServicios());
+        int duracionTotal = servicios.stream()
+                .mapToInt(Servicio::getDuracionMinuto)
+                .sum();
+
+        // Actualizar la duración total
+        cita.setDuracionTotalMinutos(duracionTotal);
         cita = citaRepository.save(cita);
+
+        // Eliminar los servicios asociados a la cita
+        citaServicioRepository.deleteAllByCita_Id(id);
+
+        // Guardar los nuevos servicios
+        for (Servicio servicio : servicios) {
+            CitaServicioId idServicio = new CitaServicioId();
+            idServicio.setIdCita(cita.getId());
+            idServicio.setIdServicio(servicio.getId());
+
+            CitaServicio citaServicio = new CitaServicio();
+            citaServicio.setId(idServicio);
+            citaServicio.setCita(cita);
+            citaServicio.setServicio(servicio);
+
+            citaServicioRepository.save(citaServicio);
+        }
+
         return CitaMapper.toResponse(cita);
     }
 
+
+
+
     @Override
     public void eliminar(Integer id) {
+        Cita cita = citaRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Cita no encontrada"));
+
+        // Eliminar los servicios asociados a la cita
+        citaServicioRepository.deleteAllByCita_Id(id);
+
+        // Eliminar la cita
         citaRepository.deleteById(id);
     }
 }
+

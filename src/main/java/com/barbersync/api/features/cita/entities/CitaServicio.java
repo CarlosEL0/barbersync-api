@@ -14,12 +14,12 @@ public class CitaServicio {
     private CitaServicioId id;
 
     @ManyToOne
-    @MapsId("idCita")
+    @MapsId("idCita")  // Relacionamos la clave primaria compuesta con la entidad Cita
     @JoinColumn(name = "id_cita")
-    private Cita cita;
+    private Cita cita;  // Relación con la entidad Cita
 
     @ManyToOne
     @MapsId("idServicio")
     @JoinColumn(name = "id_servicio")
-    private Servicio servicio;
+    private Servicio servicio;  // Relación con la entidad Servicio
 }

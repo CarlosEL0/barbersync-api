@@ -3,6 +3,7 @@ package com.barbersync.api.features.cita;
 import com.barbersync.api.features.cita.dto.CitaRequest;
 import com.barbersync.api.features.cita.dto.CitaResponse;
 import com.barbersync.api.features.cita.services.CitaService;
+import jakarta.validation.Valid; // Asegúrate de que esta anotación esté presente
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class CitaController {
     private final CitaService citaService;
 
     @PostMapping
-    public ResponseEntity<CitaResponse> crear(@RequestBody CitaRequest request) {
+    public ResponseEntity<CitaResponse> crear(@RequestBody @Valid CitaRequest request) {
         return ResponseEntity.ok(citaService.crear(request));
     }
 
@@ -32,7 +33,7 @@ public class CitaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CitaResponse> actualizar(@PathVariable Integer id, @RequestBody CitaRequest request) {
+    public ResponseEntity<CitaResponse> actualizar(@PathVariable Integer id, @RequestBody @Valid CitaRequest request) {
         return ResponseEntity.ok(citaService.actualizar(id, request));
     }
 

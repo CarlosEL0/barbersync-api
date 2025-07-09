@@ -17,7 +17,7 @@ public class Horario {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "id_usuario", referencedColumnName = "id")
+    @JoinColumn(name = "id_barbero", referencedColumnName = "id")
     private Usuario barbero;
 
     @Column(name = "hora_entrada")
@@ -27,6 +27,6 @@ public class Horario {
     private LocalTime horaSalida;
 
     @OneToOne
-    @JoinColumn(name = "id_tiempo_sesion", referencedColumnName = "id")
+    @JoinColumn(name = "tiempo_sesion_id", referencedColumnName = "id")
     private TiempoSesion tiempoSesion;
 }

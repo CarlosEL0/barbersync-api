@@ -1,86 +1,103 @@
+// Archivo: ResenaServiceImpl.java (Implementación Completa)
 package com.barbersync.api.features.resena.service.Impl;
 
 import com.barbersync.api.features.resena.Resena;
+import com.barbersync.api.features.resena.ResenaMapper;
 import com.barbersync.api.features.resena.ResenaRepository;
 import com.barbersync.api.features.resena.dto.ResenaRequest;
 import com.barbersync.api.features.resena.dto.ResenaResponse;
 import com.barbersync.api.features.resena.service.ResenaService;
-import com.barbersync.api.shared.exceptions.RecursoNoEncontradoException;
 import com.barbersync.api.features.usuario.Usuario;
 import com.barbersync.api.features.usuario.UsuarioRepository;
+import com.barbersync.api.shared.exceptions.RecursoNoEncontradoException; // Asegúrate de que la ruta de tu excepción sea correcta
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor // Esta anotación de Lombok crea el constructor con los campos 'final'
 public class ResenaServiceImpl implements ResenaService {
 
     private final ResenaRepository resenaRepository;
-    private final UsuarioRepository usuarioRepository;  // Agregado para usar el repositorio de Usuario
+    private final UsuarioRepository usuarioRepository; // Inyectado gracias a @RequiredArgsConstructor
 
     @Override
+    @Transactional
     public ResenaResponse crear(ResenaRequest request) {
-        Resena resena = new Resena();
+        // 1. Buscar al cliente por su ID desde el request
+        Usuario cliente = usuarioRepository.findById(request.getIdCliente())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Cliente no encontrado con ID: " + request.getIdCliente()));
 
-        // Buscar cliente y barbero por ID
-        Usuario cliente = usuarioRepository.findById(request.getIdCliente()).orElse(null); // Asegúrate de tener un repositorio de Usuario
-        Usuario barbero = usuarioRepository.findById(request.getIdBarbero()).orElse(null);
+        // 2. Buscar al barbero por su ID desde el request
+        Usuario barbero = usuarioRepository.findById(request.getIdBarbero())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Barbero no encontrado con ID: " + request.getIdBarbero()));
 
-        // Asignar los valores a la reseña
-        resena.setCalificacion(request.getCalificacion());
-        resena.setComentario(request.getComentario());
-        resena.setFechaResena(java.time.LocalDate.now());
-        resena.setCliente(cliente); // Asignar cliente
-        resena.setBarbero(barbero); // Asignar barbero
+        // 3. Convertir el request a una entidad Resena (sin las relaciones)
+        Resena nuevaResena = ResenaMapper.toEntity(request);
 
-        resena = resenaRepository.save(resena); // Guardar la reseña en la base de datos
+        // 4. ASIGNAR LAS ENTIDADES COMPLETAS (Este es el paso clave que faltaba)
+        nuevaResena.setCliente(cliente);
+        nuevaResena.setBarbero(barbero);
 
-        return mapToResponse(resena); // Retornar la respuesta mapeada
+        // 5. Guardar la entidad Resena, que ahora está completa
+        Resena resenaGuardada = resenaRepository.save(nuevaResena);
+
+        // 6. Convertir la entidad guardada (con cliente y barbero) a un DTO de respuesta
+        return ResenaMapper.toResponse(resenaGuardada);
     }
 
     @Override
+    @Transactional
+    public ResenaResponse actualizar(Integer id, ResenaRequest request) {
+        // 1. Buscar la reseña que se quiere actualizar
+        Resena resenaExistente = resenaRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Resena no encontrada para actualizar con ID: " + id));
+
+        // 2. Buscar las (posiblemente nuevas) entidades de cliente y barbero
+        Usuario cliente = usuarioRepository.findById(request.getIdCliente())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Cliente no encontrado con ID: " + request.getIdCliente()));
+
+        Usuario barbero = usuarioRepository.findById(request.getIdBarbero())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Barbero no encontrado con ID: " + request.getIdBarbero()));
+
+        // 3. Actualizar los campos de la entidad que ya existe en la BD
+        resenaExistente.setCalificacion(request.getCalificacion());
+        resenaExistente.setComentario(request.getComentario());
+        resenaExistente.setCliente(cliente);
+        resenaExistente.setBarbero(barbero);
+
+        // 4. Spring Data JPA detectará los cambios y los guardará al final de la transacción.
+        //    resenaRepository.save() es explícito y también funciona.
+
+        // 5. Devolver la respuesta mapeada desde la entidad actualizada
+        return ResenaMapper.toResponse(resenaExistente);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ResenaResponse obtenerPorId(Integer id) {
         Resena resena = resenaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Resena no encontrada con ID: " + id));
-        return mapToResponse(resena);
+        return ResenaMapper.toResponse(resena);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ResenaResponse> obtenerTodas() {
         return resenaRepository.findAll().stream()
-                .map(this::mapToResponse)
+                .map(ResenaMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    // Método para actualizar reseña
     @Override
-    public ResenaResponse actualizar(Integer id, ResenaRequest request) {
-        Resena resena = resenaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Resena no encontrada con ID: " + id));
-
-        resena.setCalificacion(request.getCalificacion());
-        resena.setComentario(request.getComentario());
-        resena.setFechaResena(java.time.LocalDate.now());  // O usa la fecha enviada si se requiere
-
-        resena = resenaRepository.save(resena);
-
-        return mapToResponse(resena);
-    }
-
-    @Override
+    @Transactional
     public void eliminar(Integer id) {
+        if (!resenaRepository.existsById(id)) {
+            throw new RecursoNoEncontradoException("Resena no encontrada para eliminar con ID: " + id);
+        }
         resenaRepository.deleteById(id);
-    }
-
-    private ResenaResponse mapToResponse(Resena resena) {
-        ResenaResponse response = new ResenaResponse();
-        response.setId(resena.getId());
-        response.setCalificacion(resena.getCalificacion());
-        response.setComentario(resena.getComentario());
-        response.setFechaResena(resena.getFechaResena());
-        return response;
     }
 }
