@@ -34,9 +34,10 @@ public class Usuario {
 
     private String contrasena;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id", referencedColumnName = "id")
     private Rol rol;
+
 
     //método auxiliar si solo tienes el ID del rol
     public void setRolId(Integer rolId) {

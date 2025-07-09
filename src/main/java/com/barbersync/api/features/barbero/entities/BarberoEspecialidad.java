@@ -1,5 +1,6 @@
 package com.barbersync.api.features.barbero.entities;
 
+import com.barbersync.api.features.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,10 +14,10 @@ public class BarberoEspecialidad {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "barbero_id")
-    private Barbero barbero;
+    @JoinColumn(name = "id_barbero")
+    private Usuario usuario;
 
     @ManyToOne
-    @JoinColumn(name = "especialidad_id")
+    @JoinColumn(name = "id_especialidad")
     private Especialidad especialidad;
 }

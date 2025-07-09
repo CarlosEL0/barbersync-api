@@ -13,7 +13,7 @@ public class Especialidad {
     private Integer id;
 
     @Column(name = "especialidad") // <-- Corrige el nombre del campo
-    private String nombre;
+    private String especialidad;
 
     private String descripcion; // <-- Agrega este campo que también existe en la BD
 }
