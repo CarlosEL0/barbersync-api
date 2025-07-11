@@ -4,7 +4,6 @@ import com.barbersync.api.features.cita.dto.CitaRequest;
 import com.barbersync.api.features.cita.dto.CitaResponse;
 
 public class CitaMapper {
-
     public static CitaResponse toResponse(Cita cita) {
 
         CitaResponse response = new CitaResponse();

@@ -1,9 +1,10 @@
-package com.barbersync.api.features.auth.services.impl;
+package com.barbersync.api.auth.services.impl;
 
-import com.barbersync.api.features.auth.AuthMapper;
-import com.barbersync.api.features.auth.AuthRepository;
-import com.barbersync.api.features.auth.dto.*;
-import com.barbersync.api.features.auth.services.AuthService;
+import com.barbersync.api.auth.AuthMapper;
+import com.barbersync.api.auth.AuthRepository;
+import com.barbersync.api.auth.dto.*;
+
+import com.barbersync.api.auth.services.AuthService;
 import com.barbersync.api.features.usuario.Usuario;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.barbersync.api.features.auth;
+package com.barbersync.api.auth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

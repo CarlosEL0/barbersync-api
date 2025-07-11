@@ -8,30 +8,35 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.validation.FieldError; // Importar FieldError
+import java.util.HashMap; // Importar HashMap
+import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RestControllerAdvice
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     // Maneja las excepciones de validación
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        BindingResult result = ex.getBindingResult();
-        List<String> errorMessages = result.getAllErrors().stream()
-                .map(ObjectError::getDefaultMessage)
-                .collect(Collectors.toList());
-
-        // Devolver los errores con un código HTTP 400 (Bad Request)
-        return new ResponseEntity<>(errorMessages, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return ResponseEntity.badRequest().body(errors);
     }
 
     // Maneja la excepción de recurso no encontrado
     @ExceptionHandler(RecursoNoEncontradoException.class)
     public ResponseEntity<Object> handleRecursoNoEncontradoException(RecursoNoEncontradoException ex) {
-        // Devolver un mensaje con un código HTTP 404 (Not Found)
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(404).body(error);
     }
 
     // Maneja excepciones generales de la aplicación (errores no controlados)

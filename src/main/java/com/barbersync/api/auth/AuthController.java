@@ -1,7 +1,8 @@
-package com.barbersync.api.features.auth;
+package com.barbersync.api.auth;
 
-import com.barbersync.api.features.auth.dto.*;
-import com.barbersync.api.features.auth.services.AuthService;
+import com.barbersync.api.auth.dto.*;
+import com.barbersync.api.auth.services.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponseDto> register(@RequestBody RegisterRequestDto request) {
+    public ResponseEntity<RegisterResponseDto> register(@Valid @RequestBody RegisterRequestDto request) {
         return ResponseEntity.ok(authService.registrarUsuario(request));
     }
 

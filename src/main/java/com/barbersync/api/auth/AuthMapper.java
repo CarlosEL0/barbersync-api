@@ -1,6 +1,6 @@
-package com.barbersync.api.features.auth;
+package com.barbersync.api.auth;
 
-import com.barbersync.api.features.auth.dto.AboutMeResponseDto;
+import com.barbersync.api.auth.dto.AboutMeResponseDto;
 import com.barbersync.api.features.usuario.Usuario;
 
 public class AuthMapper {

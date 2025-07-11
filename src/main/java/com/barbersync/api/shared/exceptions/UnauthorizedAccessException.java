@@ -1,4 +1,4 @@
-package com.barbersync.api.core.exception;
+package com.barbersync.api.shared.exceptions;
 
 public class UnauthorizedAccessException {
 }

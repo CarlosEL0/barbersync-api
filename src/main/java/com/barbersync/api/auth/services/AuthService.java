@@ -1,6 +1,6 @@
-package com.barbersync.api.features.auth.services;
+package com.barbersync.api.auth.services;
 
-import com.barbersync.api.features.auth.dto.*;
+import com.barbersync.api.auth.dto.*;
 
 public interface AuthService {
     RegisterResponseDto registrarUsuario(RegisterRequestDto request);

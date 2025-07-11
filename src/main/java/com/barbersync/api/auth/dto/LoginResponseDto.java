@@ -1,4 +1,4 @@
-package com.barbersync.api.features.auth.dto;
+package com.barbersync.api.auth.dto;
 
 import lombok.*;
 
@@ -6,6 +6,6 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class RegisterResponseDto {
+public class LoginResponseDto {
     private String mensaje;
 }

@@ -1,4 +1,4 @@
-package com.barbersync.api.features.auth;
+package com.barbersync.api.auth;
 
 import com.barbersync.api.features.usuario.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
