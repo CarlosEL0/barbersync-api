@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.validation.FieldError; // Importar FieldError
 import java.util.HashMap; // Importar HashMap
 import java.util.Map;
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 @RestControllerAdvice
 @ControllerAdvice
