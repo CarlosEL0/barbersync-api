@@ -42,4 +42,9 @@ public class CitaController {
         citaService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/cliente/{id}")
+    public ResponseEntity<List<CitaResponse>> obtenerPorCliente(@PathVariable Integer id) {
+        return ResponseEntity.ok(citaService.obtenerPorCliente(id));
+    }
+
 }

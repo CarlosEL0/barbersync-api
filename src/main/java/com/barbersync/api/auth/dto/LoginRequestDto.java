@@ -9,4 +9,5 @@ import lombok.*;
 public class LoginRequestDto {
     private String email;
     private String contrasena;
+    private String rol; // opcional pero útil para debug o filtros
 }

@@ -11,4 +11,6 @@ public interface CitaService {
     List<CitaResponse> obtenerTodas();
     CitaResponse actualizar(Integer id, CitaRequest request);
     void eliminar(Integer id);
+    List<CitaResponse> obtenerPorCliente(Integer idCliente);
+
 }

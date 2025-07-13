@@ -16,7 +16,7 @@ public class UsuarioMapper {
         usuario.setPrimerApellido(request.getPrimerApellido());
         usuario.setSegundoApellido(request.getSegundoApellido());
         usuario.setCorreo(request.getCorreo());
-        usuario.setContrasena(request.getContrasena());
+        usuario.setContrasena(request.getContrasena()); // ⚠️ será reemplazada por hash en el service
         usuario.setRolId(request.getRolId());
         usuario.setFechaRegistro(LocalDate.now());
         return usuario;
@@ -41,7 +41,7 @@ public class UsuarioMapper {
         usuario.setPrimerApellido(request.getPrimerApellido());
         usuario.setSegundoApellido(request.getSegundoApellido());
         usuario.setCorreo(request.getCorreo());
-        usuario.setContrasena(request.getContrasena());
         usuario.setRolId(request.getRolId());
+        // ⚠️ Contraseña se controla aparte desde el service para aplicar el hash solo si viene
     }
 }

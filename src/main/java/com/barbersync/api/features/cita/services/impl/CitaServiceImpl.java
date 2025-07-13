@@ -164,5 +164,13 @@ public class CitaServiceImpl implements CitaService {
         // Eliminar la cita
         citaRepository.deleteById(id);
     }
+    @Override
+    public List<CitaResponse> obtenerPorCliente(Integer idCliente) {
+        List<Cita> citas = citaRepository.findByCliente_Id(idCliente);
+        return citas.stream()
+                .map(CitaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
 }
 

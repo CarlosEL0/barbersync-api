@@ -44,11 +44,30 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponseDto login(LoginRequestDto request) {
         Optional<Usuario> usuarioOpt = authRepository.findByCorreo(request.getEmail());
 
-        if (usuarioOpt.isEmpty() || !passwordEncoder.matches(request.getContrasena(), usuarioOpt.get().getContrasena())) {
-            throw new RuntimeException("Credenciales inválidas");
+        if (usuarioOpt.isEmpty()) {
+            throw new RuntimeException("Correo no registrado");
         }
 
-        return new LoginResponseDto("Login exitoso");
+        Usuario usuario = usuarioOpt.get();
+
+        if (!passwordEncoder.matches(request.getContrasena(), usuario.getContrasena())) {
+            throw new RuntimeException("Contraseña incorrecta");
+        }
+
+        if (usuario.getRol() == null) {
+            throw new RuntimeException("El usuario no tiene un rol asignado");
+        }
+
+        // DEBUG opcional para ver qué usuario entra
+        System.out.println("🔐 Login exitoso para: " + usuario.getCorreo());
+        System.out.println("🎭 Rol detectado: " + usuario.getRol().getRol());
+
+        return new LoginResponseDto(
+                usuario.getId(),
+                usuario.getRol().getRol().toLowerCase(),
+                usuario.getPrimerNombre() + " " + usuario.getPrimerApellido(),
+                "Inicio de sesión exitoso"
+        );
     }
 
     @Override

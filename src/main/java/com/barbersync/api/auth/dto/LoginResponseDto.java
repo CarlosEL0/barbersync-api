@@ -7,5 +7,8 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 public class LoginResponseDto {
-    private String mensaje;
+    private Integer idUsuario;
+    private String rol; // puede ser "cliente", "barbero", "admin"
+    private String nombreCompleto;
+    private String mensaje; // opcional, para éxito o error
 }
