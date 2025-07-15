@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -100,4 +101,51 @@ public class ResenaServiceImpl implements ResenaService {
         }
         resenaRepository.deleteById(id);
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResenaResponse> obtenerPorBarbero(Integer idBarbero) {
+        Usuario barbero = usuarioRepository.findById(idBarbero)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Barbero no encontrado con ID: " + idBarbero));
+
+        List<Resena> resenas = resenaRepository.findByBarbero(barbero);
+
+        return resenas.stream()
+                .map(ResenaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResenaResponse> obtenerPorCliente(Integer idCliente) {
+        Usuario cliente = usuarioRepository.findById(idCliente)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Cliente no encontrado con ID: " + idCliente));
+
+        List<Resena> resenas = resenaRepository.findByCliente(cliente);
+
+        return resenas.stream()
+                .map(ResenaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Double obtenerPromedioCalificacion(Integer idBarbero) {
+        if (!usuarioRepository.existsById(idBarbero)) {
+            throw new RecursoNoEncontradoException("Barbero no encontrado con ID: " + idBarbero);
+        }
+
+        return resenaRepository.obtenerPromedioCalificacionPorBarbero(idBarbero);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResenaResponse> obtenerPorBarberoEntreFechas(Integer idBarbero, LocalDate inicio, LocalDate fin) {
+        Usuario barbero = usuarioRepository.findById(idBarbero)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Barbero no encontrado con ID: " + idBarbero));
+
+        List<Resena> resenas = resenaRepository.findByBarberoAndFechaResenaBetween(barbero, inicio, fin);
+
+        return resenas.stream()
+                .map(ResenaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
 }

@@ -26,7 +26,7 @@ public class Horario {
     @Column(name = "hora_salida")
     private LocalTime horaSalida;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "tiempo_sesion_id", referencedColumnName = "id")
     private TiempoSesion tiempoSesion;
 }

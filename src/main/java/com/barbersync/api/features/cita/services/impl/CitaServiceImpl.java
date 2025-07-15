@@ -17,72 +17,70 @@ import com.barbersync.api.features.servicio.ServicioRepository;
 import com.barbersync.api.features.cita.entities.CitaServicio;
 import com.barbersync.api.features.cita.entities.CitaServicioId;
 import com.barbersync.api.features.cita.CitaServicioRepository;
+import com.barbersync.api.features.cita.EstadoCitaRepository;
+
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CitaServiceImpl implements CitaService {
+
     private final ServicioRepository servicioRepository;
     private final CitaServicioRepository citaServicioRepository;
     private final CitaRepository citaRepository;
     private final UsuarioRepository usuarioRepository;
-
-    private final List<EstadoCita> estados = List.of(
-            new EstadoCita(1, "Pendiente"),
-            new EstadoCita(2, "Confirmada"),
-            new EstadoCita(3, "Cancelada")
-    );
+    private final EstadoCitaRepository estadoCitaRepository;
 
     @Override
+    @Transactional
     public CitaResponse crear(CitaRequest request) {
-        Usuario cliente = usuarioRepository.findById(request.getIdCliente())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Cliente no encontrado"));
+        Cita cita = new Cita();
+        cita.setFecha(request.getFecha());
+        cita.setHora(request.getHora());
+
+        // Asignar barbero y cliente como objetos completos
         Usuario barbero = usuarioRepository.findById(request.getIdBarbero())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Barbero no encontrado"));
-        EstadoCita estado = estados.stream()
-                .filter(e -> e.getId().equals(request.getEstadoCitaId()))
-                .findFirst()
-                .orElseThrow(() -> new RecursoNoEncontradoException("Estado de cita inválido"));
-
-        // Crear cita base
-        Cita cita = CitaMapper.toEntity(request);
-        cita.setCliente(cliente);
+        Usuario cliente = usuarioRepository.findById(request.getIdCliente())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Cliente no encontrado"));
         cita.setBarbero(barbero);
+        cita.setCliente(cliente);
+
+        // Asignar estado de cita desde la base
+        EstadoCita estado = estadoCitaRepository.findById(request.getEstadoCitaId())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Estado de cita inválido"));
         cita.setEstadoCita(estado);
-        cita.setDuracionTotalMinutos(0); // inicial
 
-        // Guardar para obtener ID
-        cita = citaRepository.save(cita);
+        // Calcular duración total con base en los servicios
+        List<Servicio> servicios = servicioRepository.findAllById(request.getIdServicios());
+        int duracionTotal = servicios.stream()
+                .mapToInt(Servicio::getDuracionMinuto)
+                .sum();
+        cita.setDuracionTotalMinutos(duracionTotal);
 
-        // Obtener servicios por ID
-        var servicios = servicioRepository.findAllById(request.getIdServicios());
+        // Guardar cita principal
+        Cita guardada = citaRepository.save(cita);
 
-        // Calcular duración y registrar cita_servicio
-        int duracionTotal = 0;
+        // Guardar servicios asociados
         for (Servicio servicio : servicios) {
-            CitaServicioId id = new CitaServicioId();
-            id.setIdCita(cita.getId());
-            id.setIdServicio(servicio.getId());
+            CitaServicioId idServicio = new CitaServicioId();
+            idServicio.setIdCita(guardada.getId());
+            idServicio.setIdServicio(servicio.getId());
 
-            CitaServicio cs = new CitaServicio();
-            cs.setId(id);
-            cs.setCita(cita);
-            cs.setServicio(servicio);
+            CitaServicio citaServicio = new CitaServicio();
+            citaServicio.setId(idServicio);
+            citaServicio.setCita(guardada);
+            citaServicio.setServicio(servicio);
 
-            citaServicioRepository.save(cs);
-
-            duracionTotal += servicio.getDuracionMinuto(); // campo real de la entidad
+            citaServicioRepository.save(citaServicio);
         }
 
-        // Actualizar duración total
-        cita.setDuracionTotalMinutos(duracionTotal);
-        cita = citaRepository.save(cita);
-
-        return CitaMapper.toResponse(cita);
+        return CitaMapper.toResponse(guardada);
     }
-
 
     @Override
     public CitaResponse obtenerPorId(Integer id) {
@@ -98,7 +96,6 @@ public class CitaServiceImpl implements CitaService {
                 .collect(Collectors.toList());
     }
 
-
     @Override
     @Transactional
     public CitaResponse actualizar(Integer id, CitaRequest request) {
@@ -109,9 +106,7 @@ public class CitaServiceImpl implements CitaService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Cliente no encontrado"));
         Usuario barbero = usuarioRepository.findById(request.getIdBarbero())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Barbero no encontrado"));
-        EstadoCita estado = estados.stream()
-                .filter(e -> e.getId().equals(request.getEstadoCitaId()))
-                .findFirst()
+        EstadoCita estado = estadoCitaRepository.findById(request.getEstadoCitaId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Estado de cita inválido"));
 
         cita.setCliente(cliente);
@@ -125,15 +120,12 @@ public class CitaServiceImpl implements CitaService {
         int duracionTotal = servicios.stream()
                 .mapToInt(Servicio::getDuracionMinuto)
                 .sum();
-
-        // Actualizar la duración total
         cita.setDuracionTotalMinutos(duracionTotal);
+
         cita = citaRepository.save(cita);
 
-        // Eliminar los servicios asociados a la cita
+        // Actualizar servicios asociados
         citaServicioRepository.deleteAllByCita_Id(id);
-
-        // Guardar los nuevos servicios
         for (Servicio servicio : servicios) {
             CitaServicioId idServicio = new CitaServicioId();
             idServicio.setIdCita(cita.getId());
@@ -150,27 +142,53 @@ public class CitaServiceImpl implements CitaService {
         return CitaMapper.toResponse(cita);
     }
 
-
-
-
     @Override
     public void eliminar(Integer id) {
         Cita cita = citaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Cita no encontrada"));
-
-        // Eliminar los servicios asociados a la cita
         citaServicioRepository.deleteAllByCita_Id(id);
-
-        // Eliminar la cita
         citaRepository.deleteById(id);
     }
+
     @Override
     public List<CitaResponse> obtenerPorCliente(Integer idCliente) {
-        List<Cita> citas = citaRepository.findByCliente_Id(idCliente);
+        return citaRepository.findByCliente_Id(idCliente).stream()
+                .map(CitaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CitaResponse> obtenerPorBarbero(Integer idBarbero) {
+        List<Cita> citas = citaRepository.findByBarbero_Id(idBarbero);
+
+        System.out.println("📌 Citas encontradas: " + citas.size());
+        for (Cita c : citas) {
+            System.out.println("Barbero en cita: " + (c.getBarbero() != null ? c.getBarbero().getPrimerNombre() : "null"));
+        }
+
         return citas.stream()
                 .map(CitaMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-}
+    @Override
+    public List<CitaResponse> obtenerPorFecha(LocalDate fecha) {
+        return citaRepository.findByFecha(fecha).stream()
+                .map(CitaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
 
+    @Override
+    public List<CitaResponse> obtenerPorBarberoYFecha(Integer idBarbero, LocalDate fecha) {
+        return citaRepository.findByBarbero_IdAndFecha(idBarbero, fecha).stream()
+                .map(CitaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CitaResponse> obtenerPorClienteYEstado(Integer idCliente, String estado) {
+        return citaRepository.findByCliente_IdAndEstadoCita_NombreEstado(idCliente, estado).stream()
+                .map(CitaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+}

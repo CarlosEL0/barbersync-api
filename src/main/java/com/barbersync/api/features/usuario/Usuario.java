@@ -39,7 +39,7 @@ public class Usuario {
     private Rol rol;
 
 
-    //método auxiliar si solo tienes el ID del rol
+    //Metodo auxiliar si solo tienes el ID del rol
     public void setRolId(Integer rolId) {
         if (this.rol == null) {
             this.rol = new Rol();

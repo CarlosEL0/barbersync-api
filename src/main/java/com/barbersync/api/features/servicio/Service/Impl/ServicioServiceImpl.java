@@ -3,7 +3,7 @@ package com.barbersync.api.features.servicio.Service.Impl;
 import com.barbersync.api.features.servicio.*;
 import com.barbersync.api.features.servicio.dto.ServicioRequest;
 import com.barbersync.api.features.servicio.dto.ServicioResponse;
-import com.barbersync.api.features.servicio.services.ServicioService;
+import com.barbersync.api.features.servicio.Service.ServicioService;
 import com.barbersync.api.shared.exceptions.RecursoNoEncontradoException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

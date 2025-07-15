@@ -1,9 +1,8 @@
+// Archivo: ResenaRequest.java
+
 package com.barbersync.api.features.resena.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 @AllArgsConstructor
@@ -20,6 +19,13 @@ public class ResenaRequest {
     @NotBlank
     private String comentario;
 
+    // AÑADIR ESTE CAMPO
+    @NotBlank // O @NotNull, dependiendo de si quieres permitir una cadena vacía
+    private String fechaResena; // Lo recibimos como String para ser flexibles
+
+    @NotNull
     private Integer idCliente;
+
+    @NotNull
     private Integer idBarbero;
 }

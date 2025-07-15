@@ -20,16 +20,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
-    private final BCryptPasswordEncoder passwordEncoder; // 🔐
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public UsuarioResponse crearUsuario(UsuarioRequest request) {
         Usuario usuario = usuarioMapper.toEntity(request);
-
-        // 🔐 Hashear la contraseña antes de guardar
         String hash = passwordEncoder.encode(request.getContrasena());
         usuario.setContrasena(hash);
-
         usuario = usuarioRepository.save(usuario);
         return usuarioMapper.toResponse(usuario);
     }
@@ -52,14 +49,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioResponse actualizarUsuario(Integer id, UsuarioRequest request) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con ID: " + id));
-
         usuarioMapper.updateEntityFromRequest(usuario, request);
-
-        // 🔐 Si viene una nueva contraseña, volver a hashearla
         if (request.getContrasena() != null && !request.getContrasena().isBlank()) {
             usuario.setContrasena(passwordEncoder.encode(request.getContrasena()));
         }
-
         usuario = usuarioRepository.save(usuario);
         return usuarioMapper.toResponse(usuario);
     }
@@ -67,5 +60,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void eliminarUsuario(Integer id) {
         usuarioRepository.deleteById(id);
+    }
+
+    @Override
+    public List<UsuarioResponse> obtenerUsuariosPorRol(String rol) {
+        List<Usuario> usuarios = usuarioRepository.findByRolRolIgnoreCase(rol);
+        return usuarios.stream()
+                .map(usuarioMapper::toResponse)
+                .collect(Collectors.toList());
     }
 }
