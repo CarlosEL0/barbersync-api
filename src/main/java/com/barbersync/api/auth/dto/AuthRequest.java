@@ -1,13 +1,11 @@
 package com.barbersync.api.auth.dto;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class LoginRequestDto {
+public class AuthRequest {
     private String username;
     private String password;
 }
-

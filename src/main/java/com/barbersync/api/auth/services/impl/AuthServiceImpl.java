@@ -64,11 +64,11 @@ public class AuthServiceImpl implements AuthService {
         try {
             // 1. Validamos las credenciales del usuario. Si son incorrectas, esto lanzará una excepción.
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getContrasena())
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
 
             // 2. Si la autenticación es exitosa, buscamos al usuario para obtener sus detalles.
-            var usuario = usuarioRepository.findByCorreo(loginRequest.getEmail())
+            var usuario = usuarioRepository.findByCorreo(loginRequest.getUsername())
                     .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado después de la autenticación."));
 
             // 3. Creamos un objeto UserDetails para pasárselo al servicio de JWT.
