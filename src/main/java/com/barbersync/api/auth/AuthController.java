@@ -46,4 +46,11 @@ public class AuthController {
     public ResponseEntity<AboutMeResponseDto> getProfile(@PathVariable Integer id) {
         return ResponseEntity.ok(authService.obtenerPerfil(id));
     }
+
+    // --- ¡NUEVO ENDPOINT PÚBLICO Y SEGURO PARA CLIENTES! ---
+    @PostMapping("/register/client")
+    public ResponseEntity<RegisterResponseDto> registerClient(@Valid @RequestBody ClientRegisterRequestDto request) {
+        return ResponseEntity.ok(authService.registrarCliente(request));
+    }
+
 }

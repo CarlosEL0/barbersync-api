@@ -27,6 +27,7 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
     private final CitaRepository citaRepository;
     private final ServicioRepository servicioRepository;
 
+    // El mapa de días ya no es necesario para la lógica principal, pero lo dejamos por si acaso.
     private static final Map<DayOfWeek, String> MAPA_DIAS = Map.of(
             DayOfWeek.MONDAY, "LUNES", DayOfWeek.TUESDAY, "MARTES",
             DayOfWeek.WEDNESDAY, "MIERCOLES", DayOfWeek.THURSDAY, "JUEVES",
@@ -44,12 +45,20 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
             return new ArrayList<>(); // Si no hay servicios, no hay horarios que mostrar
         }
 
-        String diaDeLaSemana = MAPA_DIAS.get(fecha.getDayOfWeek());
-        Horario horarioDelDia = horarioRepository.findByBarberoIdAndTiempoSesionDiaLaboral(idBarbero, diaDeLaSemana)
-                .orElseThrow(() -> new RecursoNoEncontradoException("El barbero no tiene un horario definido para este día."));
+        // ======================= INICIO DE LA CORRECCIÓN =======================
+        //
+        // La lógica original buscaba un horario por día de la semana, pero la BD no lo soporta.
+        // REEMPLAZAMOS esa búsqueda por una que busca cualquier horario genérico del barbero.
+        // Esto hará que funcione con la estructura actual de la base de datos.
+        //
+        Horario horarioDelDia = horarioRepository.findFirstByBarberoId(idBarbero)
+                .orElseThrow(() -> new RecursoNoEncontradoException("El barbero no tiene un horario de trabajo configurado en el sistema."));
+        //
+        // ======================== FIN DE LA CORRECCIÓN =========================
 
         LocalTime horaInicioTrabajo = horarioDelDia.getHoraEntrada();
         LocalTime horaFinTrabajo = horarioDelDia.getHoraSalida();
+        // NOTA: Si `getTiempoSesion()` da error de NullPointer, podría ser un problema de carga de datos.
         int intervaloMinutos = horarioDelDia.getTiempoSesion().getIntervaloSesionMinutos();
 
         List<Cita> citasExistentes = citaRepository.findByBarbero_IdAndFecha(idBarbero, fecha);

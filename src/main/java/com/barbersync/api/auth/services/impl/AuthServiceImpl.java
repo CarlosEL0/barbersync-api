@@ -12,6 +12,7 @@ import com.barbersync.api.shared.exceptions.RecursoNoEncontradoException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService; // <-- ¡NUEVA DEPENDENCIA!
+    private static final String ROL_CLIENTE_NOMBRE = "CLIENTE";
 
     // Constructor actualizado con JwtService
     public AuthServiceImpl(UsuarioRepository usuarioRepository, RolRepository rolRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService) {
@@ -36,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
         this.jwtService = jwtService;
     }
 
-    // El método de registro no cambia, está perfecto.
+    // El metodo de registro no cambia, está perfecto.
     @Override
     @Transactional
     public RegisterResponseDto registrarUsuario(RegisterRequestDto request) {
@@ -58,37 +60,76 @@ public class AuthServiceImpl implements AuthService {
         return new RegisterResponseDto("Usuario registrado exitosamente");
     }
 
-    // --- ¡MÉTODO DE LOGIN REFACTORIZADO PARA DEVOLVER JWT! ---
+    // --- ¡NUEVO MÉTODO SEGURO PARA REGISTRAR CLIENTES! ---
+    @Override
+    @Transactional
+    public RegisterResponseDto registrarCliente(ClientRegisterRequestDto request) {
+        if (usuarioRepository.findByCorreo(request.getEmail()).isPresent()) {
+            throw new RuntimeException("El correo electrónico ya está registrado.");
+        }
+
+        // 1. Buscamos el rol "CLIENTE" directamente en la base de datos.
+        // El rol NO viene de la petición del usuario.
+        Rol rolCliente = rolRepository.findByRol(ROL_CLIENTE_NOMBRE) // Necesitarás este método en RolRepository (ver Paso 4)
+                .orElseThrow(() -> new IllegalStateException("Configuración del sistema: El rol por defecto 'CLIENTE' no se encuentra en la base de datos."));
+
+        // 2. Creamos el nuevo usuario con los datos del DTO específico para clientes
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.setPrimerNombre(request.getPrimerNombre());
+        nuevoUsuario.setSegundoNombre(request.getSegundoNombre());
+        nuevoUsuario.setPrimerApellido(request.getPrimerApellido());
+        nuevoUsuario.setSegundoApellido(request.getSegundoApellido());
+        nuevoUsuario.setCorreo(request.getEmail());
+        nuevoUsuario.setContrasena(passwordEncoder.encode(request.getContrasena()));
+
+        // 3. Asignamos el rol de CLIENTE obtenido de forma segura desde el backend.
+        nuevoUsuario.setRol(rolCliente);
+
+        nuevoUsuario.setFechaRegistro(LocalDate.now());
+
+        usuarioRepository.save(nuevoUsuario);
+
+        return new RegisterResponseDto("Cliente registrado exitosamente");
+    }
+
+
     @Override
     public LoginResponseDto login(LoginRequestDto loginRequest) {
         try {
-            // 1. Validamos las credenciales del usuario. Si son incorrectas, esto lanzará una excepción.
-            authenticationManager.authenticate(
+            // 1. Validamos las credenciales y obtenemos el objeto de autenticación completo.
+            var authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
 
-            // 2. Si la autenticación es exitosa, buscamos al usuario para obtener sus detalles.
-            var usuario = usuarioRepository.findByCorreo(loginRequest.getUsername())
-                    .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado después de la autenticación."));
+            // 2. === ¡EL PASO CLAVE QUE FALTABA! ===
+            //    Establecemos esta autenticación en el contexto de seguridad de Spring.
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // 3. Creamos un objeto UserDetails para pasárselo al servicio de JWT.
+            // 3. Ahora que la autenticación fue exitosa, buscamos al usuario en la BD.
+            //    Esto es seguro porque el authenticationManager ya confirmó que existe.
+            //    Lo necesitamos para obtener el objeto 'Usuario' completo y sus detalles.
+            var usuario = usuarioRepository.findByCorreo(loginRequest.getUsername())
+                    .orElseThrow(() -> new IllegalStateException("Usuario autenticado pero no encontrado en la base de datos."));
+
+            // 4. Creamos el objeto UserDetails como lo hacías antes.
             var userDetails = new CustomUserDetails(usuario);
 
-            // 4. Generamos el token JWT.
+            // 5. Generamos el token JWT.
             String jwtToken = jwtService.generateToken(userDetails);
 
-            System.out.println("✅ Login exitoso. Token JWT generado para: " + userDetails.getUsername());
+            System.out.println("✅ Login exitoso. Autenticación establecida y token generado para: " + userDetails.getUsername());
 
-            // 5. Devolvemos una respuesta que incluye el token.
+            // 6. Devolvemos la respuesta con el token.
             return new LoginResponseDto(
                     usuario.getId(),
                     usuario.getRol().getRol().toLowerCase(),
                     usuario.getPrimerNombre() + " " + usuario.getPrimerApellido(),
                     "Inicio de sesión exitoso",
-                    jwtToken // Enviamos el token al frontend
+                    jwtToken
             );
 
         } catch (BadCredentialsException e) {
+            // Mantenemos el manejo de credenciales incorrectas.
             throw new RuntimeException("Correo o contraseña incorrectos");
         }
     }
