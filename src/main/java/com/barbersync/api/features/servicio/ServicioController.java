@@ -43,7 +43,7 @@ public class ServicioController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void eliminar(@PathVariable Integer id) {
+    public void eliminar (@PathVariable Integer id) {
         servicioService.eliminar(id);
     }
 }
