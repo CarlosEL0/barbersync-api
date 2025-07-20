@@ -2,10 +2,12 @@ package com.barbersync.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling; // <-- 1. IMPORTA ESTO
 
 @SpringBootApplication
+@EnableScheduling // <-- 2. AÑADE ESTA LÍNEA
 public class ApiApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(ApiApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ApiApplication.class, args);
+    }
 }

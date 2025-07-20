@@ -1,5 +1,9 @@
 package com.barbersync.api.features.usuario.services.impl;
 
+import com.barbersync.api.features.horario.Horario;
+import com.barbersync.api.features.horario.HorarioRepository;
+import com.barbersync.api.features.horario.entities.TiempoSesion;
+import com.barbersync.api.features.horario.TiempoSesionRepository;
 import com.barbersync.api.features.usuario.Usuario;
 import com.barbersync.api.features.usuario.UsuarioMapper;
 import com.barbersync.api.features.usuario.UsuarioRepository;
@@ -11,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,12 +27,36 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioMapper usuarioMapper;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    private final HorarioRepository horarioRepository; // ⬅ Inyectado
+    private final TiempoSesionRepository tiempoSesionRepository; // ⬅ Inyectado
+
     @Override
     public UsuarioResponse crearUsuario(UsuarioRequest request) {
         Usuario usuario = usuarioMapper.toEntity(request);
+
+        // Hashear contraseña antes de guardar
         String hash = passwordEncoder.encode(request.getContrasena());
         usuario.setContrasena(hash);
+
+        // Guardar el usuario
         usuario = usuarioRepository.save(usuario);
+
+        // ===================================================
+        // Si el usuario tiene rol BARBERO, asignar horario
+        // ===================================================
+        if (usuario.getRol() != null && "BARBERO".equalsIgnoreCase(usuario.getRol().getRol())) {
+            TiempoSesion sesionPorDefecto = tiempoSesionRepository.findById(1)
+                    .orElseThrow(() -> new RuntimeException("Tiempo de sesión por defecto no encontrado"));
+
+            Horario horario = new Horario();
+            horario.setBarbero(usuario);
+            horario.setHoraEntrada(LocalTime.of(9, 0));
+            horario.setHoraSalida(LocalTime.of(18, 0));
+            horario.setTiempoSesion(sesionPorDefecto);
+
+            horarioRepository.save(horario);
+        }
+
         return usuarioMapper.toResponse(usuario);
     }
 

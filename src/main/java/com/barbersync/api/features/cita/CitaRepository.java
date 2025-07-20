@@ -1,11 +1,11 @@
 package com.barbersync.api.features.cita;
 
-import com.barbersync.api.features.cita.Cita;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalTime; // Asegúrate de tener este import
 import java.util.List;
 
 public interface CitaRepository extends JpaRepository<Cita, Integer> {
@@ -55,6 +55,12 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
             "WHERE c.cliente.id = :idCliente AND c.estadoCita.nombreEstado = :estado")
     List<Cita> findByCliente_IdAndEstadoCita_NombreEstado(@Param("idCliente") Integer idCliente, @Param("estado") String estado);
 
-    // Esta no requiere servicios, por eso no se toca
+    // ✅ TAREA PROGRAMADA: Busca citas pasadas para actualizar su estado.
+    @Query("SELECT c FROM Cita c WHERE c.estadoCita.nombreEstado IN ('Pendiente', 'Confirmada') AND " +
+            "(c.fecha < :fechaActual OR (c.fecha = :fechaActual AND c.hora < :horaActual))")
+    List<Cita> findCitasPasadasParaActualizar(@Param("fechaActual") LocalDate fechaActual,
+                                              @Param("horaActual") LocalTime horaActual);
+
+    // ✅ BÚSQUEDA GENERAL POR ESTADO: Esta no requiere servicios, por eso no se toca.
     List<Cita> findByEstadoCita_NombreEstado(String estado);
 }

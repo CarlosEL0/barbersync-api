@@ -9,15 +9,21 @@ import java.time.LocalTime;
 
 @Data
 @Entity
-@Table(name = "horario")
+@Table(name = "horario") // Asegura que JPA use la tabla 'horario' (en minúsculas)
 public class Horario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_barbero", referencedColumnName = "id")
+    /**
+     * Relación con el barbero (Usuario).
+     * 🔧 Solución al problema: la columna en la base de datos se llama 'id_barbero',
+     * pero Hibernate intentaba buscar 'barbero_id'.
+     * Usamos @JoinColumn(name = "id_barbero") para indicarle explícitamente el nombre correcto.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_barbero", referencedColumnName = "id", nullable = false)
     private Usuario barbero;
 
     @Column(name = "hora_entrada")
