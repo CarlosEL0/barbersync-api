@@ -9,10 +9,10 @@ import java.util.List;
 
 @Repository
 public interface BarberoEspecialidadRepository extends JpaRepository<BarberoEspecialidad, Integer> {
+
+    // 🔎 Obtiene todas las especialidades asignadas a un barbero específico
     List<BarberoEspecialidad> findByUsuario(Usuario usuario);
-    // ✅ ¡AÑADE ESTA LÍNEA!
-    // Esto le enseña a Spring a borrar todas las entradas por un objeto de usuario.
+
+    // 🧹 Elimina todas las especialidades asignadas a un barbero
     void deleteByUsuario(Usuario usuario);
 }
-
-
