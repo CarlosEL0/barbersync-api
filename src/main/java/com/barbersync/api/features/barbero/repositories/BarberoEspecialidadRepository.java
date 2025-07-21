@@ -10,4 +10,9 @@ import java.util.List;
 @Repository
 public interface BarberoEspecialidadRepository extends JpaRepository<BarberoEspecialidad, Integer> {
     List<BarberoEspecialidad> findByUsuario(Usuario usuario);
+    // ✅ ¡AÑADE ESTA LÍNEA!
+    // Esto le enseña a Spring a borrar todas las entradas por un objeto de usuario.
+    void deleteByUsuario(Usuario usuario);
 }
+
+

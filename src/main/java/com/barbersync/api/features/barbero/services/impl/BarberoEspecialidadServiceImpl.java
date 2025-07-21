@@ -27,47 +27,44 @@ public class BarberoEspecialidadServiceImpl implements IBarberoEspecialidadServi
 
     @Override
     public void asignarEspecialidades(BarberoEspecialidadRequest request) {
-        System.out.println("==> Iniciando asignarEspecialidades");
+        System.out.println("==> Iniciando asignarEspecialidades (v2 - Corregida)");
 
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
-        System.out.println("==> Usuario encontrado: " + usuario.getPrimerNombre() + ", Rol: " +
-                (usuario.getRol() != null ? usuario.getRol().getRol() : "ROL NULO"));
-
-        if (usuario.getRol() == null) {
-            throw new RolInvalidoException("El usuario no tiene un rol asignado");
-        }
-
-        if (usuario.getRol().getId() != 1) {
+        // ... (tus validaciones de rol, que están perfectas, se mantienen) ...
+        if (usuario.getRol() == null || usuario.getRol().getId() != 1) {
             throw new RolInvalidoException("El usuario no tiene rol de barbero");
         }
 
-        System.out.println("==> Usuario validado como barbero, procesando especialidades...");
+        // ==========================================================
+        // ✅ ¡ESTA ES LA LÓGICA CORREGIDA!
+        // ==========================================================
+        System.out.println("==> Borrando especialidades antiguas para el usuario: " + usuario.getPrimerNombre());
 
-        List<BarberoEspecialidad> lista = request.getIdEspecialidades().stream()
-                .map(idEsp -> {
-                    System.out.println("==> Procesando especialidad ID: " + idEsp);
-                    Especialidad esp = especialidadRepository.findById(idEsp)
-                            .orElseThrow(() -> {
-                                System.out.println("❌ Especialidad NO encontrada: " + idEsp);
-                                return new RecursoNoEncontradoException("Especialidad no encontrada con ID: " + idEsp);
-                            });
-                    System.out.println("✅ Especialidad encontrada: " + esp.getEspecialidad());
+        // 1. PRIMERO, borramos todas las asignaciones existentes para este barbero.
+        barberoEspecialidadRepository.deleteByUsuario(usuario);
 
-                    BarberoEspecialidad be = new BarberoEspecialidad();
-                    be.setUsuario(usuario);
-                    be.setEspecialidad(esp);
-                    return be;
-                }).collect(Collectors.toList());
+        // 2. SEGUNDO, solo si la nueva lista de IDs no está vacía, procedemos a insertar las nuevas.
+        if (request.getIdEspecialidades() != null && !request.getIdEspecialidades().isEmpty()) {
+            System.out.println("==> Creando nuevas asignaciones...");
 
+            List<BarberoEspecialidad> nuevasAsignaciones = request.getIdEspecialidades().stream()
+                    .map(idEsp -> {
+                        Especialidad esp = especialidadRepository.findById(idEsp)
+                                .orElseThrow(() -> new RecursoNoEncontradoException("Especialidad no encontrada con ID: " + idEsp));
 
-        System.out.println("==> Especialidades construidas: " + lista.size());
+                        BarberoEspecialidad be = new BarberoEspecialidad();
+                        be.setUsuario(usuario);
+                        be.setEspecialidad(esp);
+                        return be;
+                    }).collect(Collectors.toList());
 
-        barberoEspecialidadRepository.saveAll(lista);
-
-        System.out.println("==> Guardado exitoso.");
-
+            barberoEspecialidadRepository.saveAll(nuevasAsignaciones);
+            System.out.println("==> Guardado exitoso de " + nuevasAsignaciones.size() + " nuevas especialidades.");
+        } else {
+            System.out.println("==> La lista de nuevas especialidades está vacía. No se inserta nada.");
+        }
     }
 
 
