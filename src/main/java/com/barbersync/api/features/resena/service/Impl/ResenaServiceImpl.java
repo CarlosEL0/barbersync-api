@@ -1,6 +1,8 @@
 // Archivo: ResenaServiceImpl.java (Implementación Completa)
 package com.barbersync.api.features.resena.service.Impl;
 
+import com.barbersync.api.features.cita.Cita;
+import com.barbersync.api.features.cita.CitaRepository;
 import com.barbersync.api.features.resena.Resena;
 import com.barbersync.api.features.resena.ResenaMapper;
 import com.barbersync.api.features.resena.ResenaRepository;
@@ -22,31 +24,42 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor // Esta anotación de Lombok crea el constructor con los campos 'final'
 public class ResenaServiceImpl implements ResenaService {
 
+    private final CitaRepository citaRepository;
     private final ResenaRepository resenaRepository;
     private final UsuarioRepository usuarioRepository; // Inyectado gracias a @RequiredArgsConstructor
 
     @Override
     @Transactional
     public ResenaResponse crear(ResenaRequest request) {
-        // 1. Buscar al cliente por su ID desde el request
-        Usuario cliente = usuarioRepository.findById(request.getIdCliente())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Cliente no encontrado con ID: " + request.getIdCliente()));
+        // 1. Validar que la cita a reseñar existe.
+        Cita cita = citaRepository.findById(request.getIdCita())
+                .orElseThrow(() -> new RecursoNoEncontradoException("No se puede reseñar una cita inexistente con ID: " + request.getIdCita()));
 
-        // 2. Buscar al barbero por su ID desde el request
-        Usuario barbero = usuarioRepository.findById(request.getIdBarbero())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Barbero no encontrado con ID: " + request.getIdBarbero()));
+        // 2. Validar que la cita no haya sido reseñada antes.
+        if (resenaRepository.existsByCita_Id(request.getIdCita())) {
+            throw new IllegalStateException("Error: Esta cita ya tiene una reseña y no puede ser reseñada de nuevo.");
+        }
 
-        // 3. Convertir el request a una entidad Resena (sin las relaciones)
-        Resena nuevaResena = ResenaMapper.toEntity(request);
+        // 3. Validar que la cita esté en estado "Realizada"
+        if (!"Realizada".equals(cita.getEstadoCita().getNombreEstado())) {
+            throw new IllegalStateException("Error: Solo se pueden reseñar citas que han sido 'Realizadas'. Estado actual: " + cita.getEstadoCita().getNombreEstado());
+        }
 
-        // 4. ASIGNAR LAS ENTIDADES COMPLETAS (Este es el paso clave que faltaba)
-        nuevaResena.setCliente(cliente);
-        nuevaResena.setBarbero(barbero);
+        // 4. Crear la nueva reseña
+        Resena nuevaResena = new Resena();
+        nuevaResena.setCalificacion(request.getCalificacion());
+        nuevaResena.setComentario(request.getComentario());
+        nuevaResena.setFechaResena(LocalDate.now());
 
-        // 5. Guardar la entidad Resena, que ahora está completa
+        // 5. Vincular cliente, barbero y cita automáticamente desde la entidad cita
+        nuevaResena.setCita(cita);
+        nuevaResena.setCliente(cita.getCliente());
+        nuevaResena.setBarbero(cita.getBarbero());
+
+        // 6. Guardar en base de datos
         Resena resenaGuardada = resenaRepository.save(nuevaResena);
 
-        // 6. Convertir la entidad guardada (con cliente y barbero) a un DTO de respuesta
+        // 7. Retornar respuesta
         return ResenaMapper.toResponse(resenaGuardada);
     }
 

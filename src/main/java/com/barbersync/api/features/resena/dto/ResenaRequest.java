@@ -1,5 +1,3 @@
-// Archivo: ResenaRequest.java
-
 package com.barbersync.api.features.resena.dto;
 
 import jakarta.validation.constraints.*;
@@ -19,13 +17,16 @@ public class ResenaRequest {
     @NotBlank
     private String comentario;
 
-    // AÑADIR ESTE CAMPO
-    @NotBlank // O @NotNull, dependiendo de si quieres permitir una cadena vacía
-    private String fechaResena; // Lo recibimos como String para ser flexibles
+    @NotBlank // Puedes usar @NotNull si no necesitas validar que tenga texto
+    private String fechaResena;
 
     @NotNull
     private Integer idCliente;
 
     @NotNull
     private Integer idBarbero;
+
+    // ✅ NUEVO CAMPO NECESARIO PARA VINCULAR LA CITA
+    @NotNull
+    private Integer idCita;
 }
