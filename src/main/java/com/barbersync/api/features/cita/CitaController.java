@@ -24,6 +24,7 @@ public class CitaController {
     @PostMapping
     @PreAuthorize("hasAnyRole('CLIENTE', 'BARBERO', 'ADMIN')")
     public ResponseEntity<CitaResponse> crear(@RequestBody @Valid CitaRequest request) {
+
         // (Opcional) Se podría añadir una validación extra para que un cliente solo pueda crear citas para su propio ID.
         return ResponseEntity.ok(citaService.crear(request));
     }
