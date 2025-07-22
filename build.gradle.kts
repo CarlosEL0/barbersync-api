@@ -47,6 +47,9 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	//CLOUDINARY DEPENDENCES
+	implementation("com.cloudinary:cloudinary-http44:1.33.0")
 }
 
 tasks.withType<Test> {
