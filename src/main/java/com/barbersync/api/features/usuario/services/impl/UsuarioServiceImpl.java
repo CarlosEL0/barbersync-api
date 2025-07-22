@@ -10,7 +10,8 @@ import com.barbersync.api.features.usuario.UsuarioRepository;
 import com.barbersync.api.features.usuario.dto.UsuarioRequest;
 import com.barbersync.api.features.usuario.dto.UsuarioResponse;
 import com.barbersync.api.features.usuario.services.UsuarioService;
-import com.barbersync.api.features.barbero.repositories.BarberoEspecialidadRepository; // ✅ CORRECTO
+import com.barbersync.api.features.barbero.repositories.BarberoEspecialidadRepository;
+import com.barbersync.api.shared.exceptions.CorreoYaExisteException; // ✅ Importamos la nueva excepción
 import com.barbersync.api.shared.exceptions.RecursoNoEncontradoException;
 
 import lombok.RequiredArgsConstructor;
@@ -26,45 +27,36 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
 
+    // --- DEPENDENCIAS (NO SE TOCAN) ---
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final HorarioRepository horarioRepository;
     private final TiempoSesionRepository tiempoSesionRepository;
-
-    // ✅ NUEVO: Inyección para limpiar especialidades si se elimina un barbero
     private final BarberoEspecialidadRepository barberoEspecialidadRepository;
 
+    // --- MÉTODO crearUsuario (NO SE TOCA, LÓGICA PERFECTA) ---
     @Override
     public UsuarioResponse crearUsuario(UsuarioRequest request) {
         Usuario usuario = usuarioMapper.toEntity(request);
-
-        // Hashear contraseña antes de guardar
         String hash = passwordEncoder.encode(request.getContrasena());
         usuario.setContrasena(hash);
-
-        // Guardar el usuario
         usuario = usuarioRepository.save(usuario);
 
-        // ===================================================
-        // Si el usuario tiene rol BARBERO, asignar horario
-        // ===================================================
         if (usuario.getRol() != null && "BARBERO".equalsIgnoreCase(usuario.getRol().getRol())) {
             TiempoSesion sesionPorDefecto = tiempoSesionRepository.findById(1)
                     .orElseThrow(() -> new RuntimeException("Tiempo de sesión por defecto no encontrado"));
-
             Horario horario = new Horario();
             horario.setBarbero(usuario);
             horario.setHoraEntrada(LocalTime.of(9, 0));
             horario.setHoraSalida(LocalTime.of(18, 0));
             horario.setTiempoSesion(sesionPorDefecto);
-
             horarioRepository.save(horario);
         }
-
         return usuarioMapper.toResponse(usuario);
     }
 
+    // --- MÉTODO obtenerUsuarioPorId (NO SE TOCA, LÓGICA PERFECTA) ---
     @Override
     public UsuarioResponse obtenerUsuarioPorId(Integer id) {
         Usuario usuario = usuarioRepository.findById(id)
@@ -72,6 +64,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioMapper.toResponse(usuario);
     }
 
+    // --- MÉTODO obtenerUsuarios (NO SE TOCA, LÓGICA PERFECTA) ---
     @Override
     public List<UsuarioResponse> obtenerUsuarios() {
         return usuarioRepository.findAll().stream()
@@ -79,50 +72,70 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .collect(Collectors.toList());
     }
 
+    // =========================================================================
+    // === MÉTODO actualizarUsuario (¡ESTA ES LA VERSIÓN FINAL Y CORREGIDA!) ===
+    // =========================================================================
     @Override
+    @Transactional
     public UsuarioResponse actualizarUsuario(Integer id, UsuarioRequest request) {
-        Usuario usuario = usuarioRepository.findById(id)
+
+        // 1. Buscamos al usuario en la base de datos que queremos actualizar.
+        var usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con ID: " + id));
-        usuarioMapper.updateEntityFromRequest(usuario, request);
-        if (request.getContrasena() != null && !request.getContrasena().isBlank()) {
-            usuario.setContrasena(passwordEncoder.encode(request.getContrasena()));
+
+        // 2. ✅ ¡LÓGICA DE VALIDACIÓN DE CORREO "INTELIGENTE"! ✅
+        //    Esto soluciona el error 400 del validador @UniqueEmail.
+        //    Solo validamos la unicidad si el correo que nos llega es DIFERENTE al que ya tiene el usuario.
+        if (request.getCorreo() != null && !request.getCorreo().equalsIgnoreCase(usuario.getCorreo())) {
+            // Si el correo es nuevo, verificamos si ya existe en la base de datos para OTRO usuario.
+            if (usuarioRepository.findByCorreo(request.getCorreo()).isPresent()) {
+                // Si ya existe, lanzamos nuestra excepción personalizada.
+                throw new CorreoYaExisteException("El correo '" + request.getCorreo() + "' ya está en uso.");
+            }
+            // Si no existe, lo actualizamos en el objeto usuario.
+            usuario.setCorreo(request.getCorreo());
         }
-        usuario = usuarioRepository.save(usuario);
-        return usuarioMapper.toResponse(usuario);
+
+        // 3. Actualizamos los demás datos del perfil.
+        usuario.setPrimerNombre(request.getPrimerNombre());
+        usuario.setSegundoNombre(request.getSegundoNombre());
+        usuario.setPrimerApellido(request.getPrimerApellido());
+        usuario.setSegundoApellido(request.getSegundoApellido());
+
+        // 4. 🚨 ¡LÓGICA DE SEGURIDAD CRÍTICA PARA LA CONTRASEÑA! 🚨
+        //    Revisamos si la contraseña que nos llegó es real o es el "placeholder" del frontend.
+        String contrasenaRecibida = request.getContrasena();
+        if (contrasenaRecibida != null && !contrasenaRecibida.isBlank() && !contrasenaRecibida.equals("password_falsa_para_validar")) {
+            // Solo si es una contraseña nueva y real, la codificamos y la actualizamos.
+            usuario.setContrasena(passwordEncoder.encode(contrasenaRecibida));
+            System.out.println("LOG: Contraseña actualizada para el usuario ID: " + id);
+        } else {
+            // Si es el placeholder, no hacemos NADA, y la contraseña original se mantiene segura.
+            System.out.println("LOG: Contraseña NO actualizada para el usuario ID: " + id);
+        }
+
+        // 5. Guardamos todos los cambios en la base de datos.
+        var usuarioGuardado = usuarioRepository.save(usuario);
+
+        // 6. Devolvemos el usuario actualizado al frontend.
+        return usuarioMapper.toResponse(usuarioGuardado);
     }
 
+    // --- MÉTODO eliminarUsuario (NO SE TOCA, LÓGICA PERFECTA) ---
     @Override
-    @Transactional // <-- ¡Esta anotación asegura que todo el método sea una transacción segura!
+    @Transactional
     public void eliminarUsuario(Integer id) {
-        // 1. Buscamos el usuario para tener su información, especialmente su ROL.
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario a eliminar no encontrado con ID: " + id));
 
-        // 2. VERIFICAMOS LAS DEPENDENCIAS Y LIMPIAMOS
-        // Verificamos si es un barbero para limpiar sus especialidades.
-        if (usuario.getRol() != null && usuario.getRol().getId() == 1) { // Suponiendo que el rol de Barbero es 1
-            System.out.println("==> Limpiando dependencias del barbero ID: " + id);
-
-            // ¡LA LÓGICA DE LIMPIEZA!
-            // Le decimos al repositorio de especialidades que borre todas las filas relacionadas con este usuario.
+        if (usuario.getRol() != null && usuario.getRol().getId() == 1) {
             barberoEspecialidadRepository.deleteByUsuario(usuario);
-
-            // Aquí también limpiarías otras tablas como Horario, si fuera necesario.
-            // horarioRepository.deleteByBarbero(usuario);
         }
 
-        // Aquí podrías añadir lógica para limpiar las citas de un CLIENTE si lo borras.
-        // if (usuario.getRol() != null && usuario.getRol().getId() == 2) {
-        //     citaRepository.deleteByCliente(usuario);
-        // }
-
-        // 3. PASO FINAL: AHORA SÍ, BORRAMOS AL USUARIO
-        // Como ya no hay nada que apunte a él, la base de datos permitirá el borrado.
-        System.out.println("==> Procediendo a eliminar el usuario ID: " + id);
         usuarioRepository.delete(usuario);
-        System.out.println("==> Usuario eliminado con éxito.");
     }
 
+    // --- MÉTODO obtenerUsuariosPorRol (NO SE TOCA, LÓGICA PERFECTA) ---
     @Override
     public List<UsuarioResponse> obtenerUsuariosPorRol(String rol) {
         List<Usuario> usuarios = usuarioRepository.findByRolRolIgnoreCase(rol);

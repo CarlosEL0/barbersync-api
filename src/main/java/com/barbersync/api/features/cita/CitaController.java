@@ -19,6 +19,16 @@ import java.util.List;
 public class CitaController {
 
     private final CitaService citaService;
+    // REGLA: Un barbero o admin puede cambiar el estado de una cita.
+// Usamos PATCH porque es una actualización parcial (solo el estado).
+    @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasRole('ADMIN') or @citaSecurityService.estaInvolucradoEnCita(authentication, #id)")
+    public ResponseEntity<CitaResponse> actualizarEstado(
+            @PathVariable Integer id,
+            @RequestParam String estado) { // Recibimos el nuevo estado como un parámetro de la URL
+        return ResponseEntity.ok(citaService.actualizarEstado(id, estado));
+    }
+
 
     // REGLA: Un cliente puede crear una cita para sí mismo. Un barbero o un admin también podrían crearla.
     @PostMapping

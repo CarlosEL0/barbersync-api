@@ -27,6 +27,8 @@ public interface CitaService {
 
     List<CitaResponse> obtenerPorClienteYEstado(Integer idCliente, String estado);
 
+    CitaResponse actualizarEstado(Integer idCita, String nuevoEstado);
+
     void actualizarEstadoCitasARealizada();
 
 

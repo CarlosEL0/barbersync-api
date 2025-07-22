@@ -28,6 +28,7 @@ repositories {
 }
 
 dependencies {
+	implementation("com.google.code.findbugs:jsr305:3.0.2")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-validation")

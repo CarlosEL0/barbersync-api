@@ -24,5 +24,6 @@ public class CitaResponse {
     private String nombreCliente;      // ✅ nuevo
     private String nombreBarbero;      // ✅ nuevo
     private List <ServicioResponse> servicios = new ArrayList<>();
+    private String fechaHora;
 }
 

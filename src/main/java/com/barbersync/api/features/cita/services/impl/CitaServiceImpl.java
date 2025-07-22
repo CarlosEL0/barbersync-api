@@ -12,6 +12,7 @@ import com.barbersync.api.features.servicio.ServicioRepository;
 import com.barbersync.api.features.usuario.Usuario;
 import com.barbersync.api.features.usuario.UsuarioRepository;
 import com.barbersync.api.shared.exceptions.RecursoNoEncontradoException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger; // <-- IMPORTANTE
 import org.slf4j.LoggerFactory; // <-- IMPORTANTE
@@ -177,7 +178,7 @@ public class CitaServiceImpl implements CitaService {
                 .collect(Collectors.toList());
     }
 
-    // ✅ MÉTODO PROGRAMADO CON LOGS PARA DEPURACIÓN
+    // ✅ METODO PROGRAMADO CON LOGS PARA DEPURACIÓN
     @Override
     @Transactional
     @Scheduled(cron = "0 * * * * ?") // Cada minuto para pruebas
@@ -206,5 +207,25 @@ public class CitaServiceImpl implements CitaService {
         citaRepository.saveAll(citasParaActualizar);
 
         log.info("💾 [TAREA PROGRAMADA] ¡ÉXITO! Se actualizaron {} citas al estado 'Realizada'.", citasParaActualizar.size());
+    }
+
+    @Override
+    public CitaResponse actualizarEstado(Integer idCita, String nuevoEstado) {
+        // 1. Buscar la cita
+        var cita = citaRepository.findById(idCita)
+                .orElseThrow(() -> new EntityNotFoundException("Cita no encontrada con id: " + idCita));
+
+        // 2. Buscar el objeto EstadoCita
+        var estado = estadoCitaRepository.findByNombreEstado(nuevoEstado)
+                .orElseThrow(() -> new IllegalArgumentException("El estado '" + nuevoEstado + "' no es válido."));
+
+        // 3. Actualizar el estado en la entidad
+        cita.setEstadoCita(estado); // <-- Primera corrección
+
+        // 4. Guardar la cita
+        var citaGuardada = citaRepository.save(cita);
+
+        // 5. Mapear la entidad guardada a un DTO de respuesta y devolverla
+        return CitaMapper.toResponse(citaGuardada); // <-- Segunda corrección
     }
 }

@@ -23,7 +23,6 @@ public class UsuarioRequest {
     private String segundoApellido;
 
     @Email(message = "Debe ser un correo válido")
-    @UniqueEmail
     private String correo;
 
     @NotBlank(message = "La contraseña es obligatoria")

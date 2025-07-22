@@ -26,28 +26,37 @@ public class BarberoEspecialidadServiceImpl implements IBarberoEspecialidadServi
     private final UsuarioRepository usuarioRepository;
 
     @Override
+    @Transactional
     public void asignarEspecialidades(BarberoEspecialidadRequest request) {
-        System.out.println("==> Iniciando asignarEspecialidades (v2 - Corregida)");
+        System.out.println("==> Iniciando asignarEspecialidades (v5 - Estrategia Definitiva y Segura)");
 
+        // 1. Obtenemos el usuario que vamos a modificar. (Esto ya estaba perfecto)
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con ID: " + request.getIdUsuario()));
 
-        // ... (tus validaciones de rol, que están perfectas, se mantienen) ...
-        if (usuario.getRol() == null || usuario.getRol().getId() != 1) {
+        // 2. Validación de rol. (Perfecto también)
+        if (usuario.getRol() == null || usuario.getRol().getId() != 1) { // Asumiendo que 1 es 'BARBERO'
             throw new RolInvalidoException("El usuario no tiene rol de barbero");
         }
 
         // ==========================================================
-        // ✅ ¡ESTA ES LA LÓGICA CORREGIDA!
+        // ✅ ¡ESTA ES LA ESTRATEGIA MÁS ROBUSTA!
         // ==========================================================
-        System.out.println("==> Borrando especialidades antiguas para el usuario: " + usuario.getPrimerNombre());
+        System.out.println("==> Buscando especialidades antiguas para el usuario: " + usuario.getPrimerNombre());
 
-        // 1. PRIMERO, borramos todas las asignaciones existentes para este barbero.
-        barberoEspecialidadRepository.deleteByUsuario(usuario);
+        // 3. PRIMERO: Buscamos la lista exacta de las relaciones que vamos a borrar.
+        List<BarberoEspecialidad> asignacionesViejas = barberoEspecialidadRepository.findByUsuario(usuario);
 
-        // 2. SEGUNDO, solo si la nueva lista de IDs no está vacía, procedemos a insertar las nuevas.
+        // 4. SEGUNDO: Si la lista no está vacía, la borramos.
+        // Esto es más explícito y seguro para JPA que un 'deleteByUsuario()'.
+        if (!asignacionesViejas.isEmpty()) {
+            System.out.println("==> Borrando " + asignacionesViejas.size() + " especialidades antiguas.");
+            barberoEspecialidadRepository.deleteAll(asignacionesViejas);
+        }
+
+        // 5. TERCERO: Creamos y guardamos las nuevas. (Esta lógica ya estaba perfecta).
         if (request.getIdEspecialidades() != null && !request.getIdEspecialidades().isEmpty()) {
-            System.out.println("==> Creando nuevas asignaciones...");
+            System.out.println("==> Creando " + request.getIdEspecialidades().size() + " nuevas asignaciones...");
 
             List<BarberoEspecialidad> nuevasAsignaciones = request.getIdEspecialidades().stream()
                     .map(idEsp -> {

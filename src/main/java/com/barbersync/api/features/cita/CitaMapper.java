@@ -2,15 +2,15 @@ package com.barbersync.api.features.cita;
 
 import com.barbersync.api.features.cita.dto.CitaRequest;
 import com.barbersync.api.features.cita.dto.CitaResponse;
-import com.barbersync.api.features.usuario.Usuario; // Asegúrate de importar tu clase Usuario
+import com.barbersync.api.features.usuario.Usuario;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class CitaMapper {
 
-    // METODO PRIVADO PARA CONSTRUIR NOMBRES DE FORMA SEGURA
+    // MÉTODO PRIVADO PARA CONSTRUIR NOMBRES DE FORMA SEGURA
     private static String construirNombreCompleto(Usuario usuario) {
         if (usuario == null) {
             return "Usuario no asignado";
@@ -21,10 +21,6 @@ public class CitaMapper {
         if (usuario.getPrimerNombre() != null && !usuario.getPrimerNombre().isBlank()) {
             partesNombre.add(usuario.getPrimerNombre());
         }
-        // Puedes agregar el segundo nombre si quieres
-        // if (usuario.getSegundoNombre() != null && !usuario.getSegundoNombre().isBlank()) {
-        //     partesNombre.add(usuario.getSegundoNombre());
-        // }
         if (usuario.getPrimerApellido() != null && !usuario.getPrimerApellido().isBlank()) {
             partesNombre.add(usuario.getPrimerApellido());
         }
@@ -33,7 +29,6 @@ public class CitaMapper {
     }
 
     public static CitaResponse toResponse(Cita cita) {
-        // Un chequeo de seguridad inicial
         if (cita == null) {
             return null;
         }
@@ -43,18 +38,26 @@ public class CitaMapper {
         response.setFecha(cita.getFecha());
         response.setHora(cita.getHora());
 
-        // Asumiendo que getDuracionTotalMinutos no puede ser null en la entidad
-        if(cita.getDuracionTotalMinutos() != null) {
-            response.setDuracionTotalMinutos(cita.getDuracionTotalMinutos());
+        // --- NUEVO: Combinamos fecha y hora ---
+        if (cita.getFecha() != null && cita.getHora() != null) {
+            LocalDateTime fechaYHora = LocalDateTime.of(cita.getFecha(), cita.getHora());
+            response.setFechaHora(fechaYHora.toString()); // Formato ISO: "2025-07-21T15:00"
         } else {
-            response.setDuracionTotalMinutos(0); // Valor por defecto
+            response.setFechaHora(null);
         }
 
-        // Usamos el método seguro para construir el nombre
+        // Duración total
+        if (cita.getDuracionTotalMinutos() != null) {
+            response.setDuracionTotalMinutos(cita.getDuracionTotalMinutos());
+        } else {
+            response.setDuracionTotalMinutos(0); // Por defecto
+        }
+
+        // Nombres
         response.setNombreCliente(construirNombreCompleto(cita.getCliente()));
         response.setNombreBarbero(construirNombreCompleto(cita.getBarbero()));
 
-        // Asignamos los IDs si existen
+        // IDs
         if (cita.getCliente() != null) {
             response.setIdCliente(cita.getCliente().getId());
         }
@@ -62,7 +65,7 @@ public class CitaMapper {
             response.setIdBarbero(cita.getBarbero().getId());
         }
 
-        // Manejamos el estado de la cita de forma segura
+        // Estado
         if (cita.getEstadoCita() != null && cita.getEstadoCita().getNombreEstado() != null) {
             response.setEstado(cita.getEstadoCita().getNombreEstado());
         } else {

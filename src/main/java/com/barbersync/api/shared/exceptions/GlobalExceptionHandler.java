@@ -1,5 +1,10 @@
 package com.barbersync.api.shared.exceptions;
 
+// =================================================================
+// ✅ ¡EL IMPORT QUE FALTABA ESTÁ AQUÍ! ✅
+// =================================================================
+import com.barbersync.api.shared.exceptions.CorreoYaExisteException;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +21,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Maneja las excepciones de validación
+    // Maneja las excepciones de validación (de @Valid)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -28,31 +33,41 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    // Maneja la excepción de recurso no encontrado
+    // Maneja la excepción de recurso no encontrado (404)
     @ExceptionHandler(RecursoNoEncontradoException.class)
     public ResponseEntity<Object> handleRecursoNoEncontradoException(RecursoNoEncontradoException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
-        return ResponseEntity.status(404).body(error);
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    // Maneja excepciones generales de la aplicación (errores no controlados)
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleAllExceptions(Exception ex) {
-        return new ResponseEntity<>("Ocurrió un error interno en el servidor", HttpStatus.INTERNAL_SERVER_ERROR);
+    // Manejador para el correo duplicado (¡Ahora funcionará!)
+    @ExceptionHandler(CorreoYaExisteException.class)
+    public ResponseEntity<Map<String, String>> handleCorreoYaExisteException(CorreoYaExisteException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT); // 409
     }
 
-    // ✅ NUEVO: Maneja violaciones de integridad de datos (como claves foráneas)
+    // Maneja violaciones de integridad de datos
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("mensaje", "No se puede eliminar. Esta especialidad ya está asignada a uno o más barberos.");
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); // 409
+        errorResponse.put("error", "Error de integridad de datos. El recurso puede estar en uso.");
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
-    // Maneja errores de tipo NullPointerException
+    // ... (El resto de tus manejadores de excepciones se quedan igual) ...
+
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<String> handleNullPointerException(NullPointerException ex) {
-        return new ResponseEntity<>("Intento de acceso a un objeto nulo", HttpStatus.INTERNAL_SERVER_ERROR);
+        ex.printStackTrace(); // Es útil para depurar en la consola
+        return new ResponseEntity<>("Error interno: Referencia nula encontrada.", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleAllExceptions(Exception ex) {
+        ex.printStackTrace(); // Es útil para depurar en la consola
+        return new ResponseEntity<>("Ocurrió un error interno inesperado.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
