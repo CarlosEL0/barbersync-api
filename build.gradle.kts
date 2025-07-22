@@ -28,6 +28,7 @@ repositories {
 }
 
 dependencies {
+	implementation("com.cloudinary:cloudinary-http44:1.38.0") // O una versión más reciente
 	implementation("com.google.code.findbugs:jsr305:3.0.2")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-security")

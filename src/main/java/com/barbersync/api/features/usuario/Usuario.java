@@ -38,6 +38,8 @@ public class Usuario {
     @JoinColumn(name = "rol_id", referencedColumnName = "id")
     private Rol rol;
 
+    @Column (name = "url_imagen")
+    private  String urlImagen;
 
     //Metodo auxiliar si solo tienes el ID del rol
     public void setRolId(Integer rolId) {
