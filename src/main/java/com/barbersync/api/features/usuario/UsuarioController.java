@@ -3,6 +3,7 @@ package com.barbersync.api.features.usuario;
 import com.barbersync.api.cloudinary.services.CloudinaryService;
 import com.barbersync.api.features.usuario.dto.UsuarioRequest;
 import com.barbersync.api.features.usuario.dto.UsuarioResponse;
+import com.barbersync.api.features.usuario.dto.UsuarioUpdateRequest;
 import com.barbersync.api.features.usuario.services.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,9 @@ public class UsuarioController {
     // REGLA: Un usuario actualiza su propio perfil. Un ADMIN actualiza cualquiera.
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public UsuarioResponse actualizarUsuario(@PathVariable Integer id, @RequestBody @Valid UsuarioRequest request) {
+//           👇👇👇 CAMBIO AQUÍ 👇👇👇
+    public UsuarioResponse actualizarUsuario(@PathVariable Integer id, @RequestBody @Valid UsuarioUpdateRequest request) {
+        //                                  👆👆👆 Y AQUÍ 👆👆👆
         return usuarioService.actualizarUsuario(id, request);
     }
 

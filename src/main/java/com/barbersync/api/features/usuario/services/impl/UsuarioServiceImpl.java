@@ -4,11 +4,14 @@ import com.barbersync.api.features.horario.Horario;
 import com.barbersync.api.features.horario.HorarioRepository;
 import com.barbersync.api.features.horario.entities.TiempoSesion;
 import com.barbersync.api.features.horario.TiempoSesionRepository;
+import com.barbersync.api.features.rol.Rol;
+import com.barbersync.api.features.rol.RolRepository;
 import com.barbersync.api.features.usuario.Usuario;
 import com.barbersync.api.features.usuario.UsuarioMapper;
 import com.barbersync.api.features.usuario.UsuarioRepository;
 import com.barbersync.api.features.usuario.dto.UsuarioRequest;
 import com.barbersync.api.features.usuario.dto.UsuarioResponse;
+import com.barbersync.api.features.usuario.dto.UsuarioUpdateRequest;
 import com.barbersync.api.features.usuario.services.UsuarioService;
 import com.barbersync.api.features.barbero.repositories.BarberoEspecialidadRepository; // ✅ CORRECTO
 import com.barbersync.api.shared.exceptions.RecursoNoEncontradoException;
@@ -34,7 +37,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     // ✅ NUEVO: Inyección para limpiar especialidades si se elimina un barbero
     private final BarberoEspecialidadRepository barberoEspecialidadRepository;
-
+    private final RolRepository rolRepository;
     @Override
     public UsuarioResponse crearUsuario(UsuarioRequest request) {
         Usuario usuario = usuarioMapper.toEntity(request);
@@ -79,20 +82,42 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .collect(Collectors.toList());
     }
 
+// REEMPLAZA TU MÉTODO ACTUAL CON ESTE CÓDIGO CORREGIDO
+
     @Override
+    @Transactional // Es importante que el método sea transaccional
     public UsuarioResponse actualizarUsuario(Integer id, UsuarioRequest request) {
+        // 1. Buscamos el usuario existente en la base de datos
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con ID: " + id));
+
+        // 2. Usamos el mapper para actualizar los campos simples (nombre, correo, etc.)
+        //    Asegúrate de que tu mapper NO intente actualizar el Rol.
         usuarioMapper.updateEntityFromRequest(usuario, request);
+
+        // 3. Manejamos la actualización del Rol de forma separada y segura
+        if (request.getRolId() != null) {
+            // Buscamos la entidad Rol completa por su ID
+            Rol nuevoRol = rolRepository.findById(request.getRolId())
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Rol no encontrado con ID: " + request.getRolId()));
+            // Asignamos la instancia completa del Rol a nuestro usuario
+            usuario.setRol(nuevoRol);
+        }
+
+        // 4. Actualizamos la contraseña solo si se ha proporcionado una nueva
         if (request.getContrasena() != null && !request.getContrasena().isBlank()) {
             usuario.setContrasena(passwordEncoder.encode(request.getContrasena()));
         }
-        usuario = usuarioRepository.save(usuario);
-        return usuarioMapper.toResponse(usuario);
+
+        // 5. Guardamos la entidad Usuario actualizada en la base de datos
+        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+
+        // 6. Convertimos la entidad guardada a un DTO de respuesta y la devolvemos
+        return usuarioMapper.toResponse(usuarioGuardado);
     }
 
     @Override
-    @Transactional // <-- ¡Esta anotación asegura que todo el metodo sea una transacción segura!
+    @Transactional // <-- ¡Esta anotación asegura que todo el methods sea una transacción segura!
     public void eliminarUsuario(Integer id) {
         // 1. Buscamos el usuario para tener su información, especialmente su ROL.
         Usuario usuario = usuarioRepository.findById(id)
@@ -150,4 +175,35 @@ public class UsuarioServiceImpl implements UsuarioService {
         // 4. Convertimos la entidad actualizada a un DTO de respuesta y la devolvemos
         return usuarioMapper.toResponse(usuarioGuardado);
     }
+
+    @Override
+    @Transactional
+    public UsuarioResponse actualizarUsuario(Integer id, UsuarioUpdateRequest request) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con ID: " + id));
+
+        // Como el nuevo DTO solo tiene campos seguros, podemos mapearlos
+        // sin la lógica compleja del Rol y la Contraseña.
+
+        // Vamos a mapearlos manualmente para mayor claridad:
+        if (request.getPrimerNombre() != null) {
+            usuario.setPrimerNombre(request.getPrimerNombre());
+        }
+        if (request.getPrimerApellido() != null) {
+            usuario.setPrimerApellido(request.getPrimerApellido());
+        }
+        // Maneja campos opcionales que pueden ser nulos
+        usuario.setSegundoNombre(request.getSegundoNombre());
+        usuario.setSegundoApellido(request.getSegundoApellido());
+
+        if (request.getCorreo() != null) {
+            usuario.setCorreo(request.getCorreo());
+        }
+
+        // NO hay lógica de contraseña aquí, por lo que nunca se actualizará por error.
+
+        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+        return usuarioMapper.toResponse(usuarioGuardado);
+    }
+
 }

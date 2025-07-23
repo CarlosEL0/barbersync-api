@@ -32,16 +32,17 @@ public class UsuarioMapper {
         response.setCorreo(usuario.getCorreo());
         response.setFechaRegistro(usuario.getFechaRegistro().toString());
         response.setRolId(usuario.getRolId());
+        // 👇 AÑADIR ESTA LÍNEA ESENCIAL 👇
+        response.setUrlImagen(usuario.getUrlImagen());
         return response;
     }
-
     public void updateEntityFromRequest(Usuario usuario, UsuarioRequest request) {
         usuario.setPrimerNombre(request.getPrimerNombre());
         usuario.setSegundoNombre(request.getSegundoNombre());
         usuario.setPrimerApellido(request.getPrimerApellido());
         usuario.setSegundoApellido(request.getSegundoApellido());
         usuario.setCorreo(request.getCorreo());
-        usuario.setRolId(request.getRolId());
+        //usuario.setRolId(request.getRolId());
         // ⚠️ Contraseña se controla aparte desde el service para aplicar el hash solo si viene
     }
 }

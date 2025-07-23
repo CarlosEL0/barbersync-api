@@ -15,4 +15,6 @@ public class UsuarioResponse {
     private String correo;
     private String fechaRegistro;
     private Integer rolId;
+
+    private String urlImagen;
 }

@@ -3,6 +3,7 @@ package com.barbersync.api.features.usuario.services;
 import java.util.List;
 import com.barbersync.api.features.usuario.dto.UsuarioRequest;
 import com.barbersync.api.features.usuario.dto.UsuarioResponse;
+import com.barbersync.api.features.usuario.dto.UsuarioUpdateRequest;
 
 public interface UsuarioService {
 
@@ -15,4 +16,5 @@ public interface UsuarioService {
 
     // ✅✅✅ AÑADE ESTA LÍNEA AQUÍ ✅✅✅
     UsuarioResponse actualizarUrlImagen(Integer id, String urlImagen);
-}
+    // ✅✅✅ AÑADE ESTA SOBRECARGA DEL MÉTODO ✅✅✅
+    UsuarioResponse actualizarUsuario(Integer id, UsuarioUpdateRequest usuarioUpdateRequest);}
