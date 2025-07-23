@@ -117,32 +117,29 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    @Transactional // <-- ¡Esta anotación asegura que todo el methods sea una transacción segura!
+    @Transactional
     public void eliminarUsuario(Integer id) {
-        // 1. Buscamos el usuario para tener su información, especialmente su ROL.
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario a eliminar no encontrado con ID: " + id));
 
-        // 2. VERIFICAMOS LAS DEPENDENCIAS Y LIMPIAMOS
-        // Verificamos si es un barbero para limpiar sus especialidades.
-        if (usuario.getRol() != null && usuario.getRol().getId() == 1) { // Suponiendo que el rol de Barbero es 1
+        // VERIFICAMOS LAS DEPENDENCIAS Y LIMPIAMOS
+        // Verificamos si es un barbero para limpiar todas sus dependencias.
+        if (usuario.getRol() != null && "BARBERO".equalsIgnoreCase(usuario.getRol().getRol())) {
             System.out.println("==> Limpiando dependencias del barbero ID: " + id);
 
-            // ¡LA LÓGICA DE LIMPIEZA!
-            // Le decimos al repositorio de especialidades que borre todas las filas relacionadas con este usuario.
+            // 1. Limpiamos las especialidades (esto ya lo tenías)
+            System.out.println("...Borrando especialidades...");
             barberoEspecialidadRepository.deleteByUsuario(usuario);
 
-            // Aquí también limpiarías otras tablas como Horario, si fuera necesario.
-            // horarioRepository.deleteByBarbero(usuario);
+            // 2. ✅✅✅ ¡AQUÍ ESTÁ LA SOLUCIÓN! LIMPIAMOS EL HORARIO ✅✅✅
+            // Con esto eliminamos la fila "hija" de la tabla horario.
+            System.out.println("...Borrando horario...");
+            horarioRepository.deleteByBarbero(usuario);
         }
 
-        // Aquí podrías añadir lógica para limpiar las citas de un CLIENTE si lo borras.
-        // if (usuario.getRol() != null && usuario.getRol().getId() == 2) {
-        //     citaRepository.deleteByCliente(usuario);
-        // }
+        // ... aquí iría la limpieza de otras dependencias si las hubiera (citas, etc.) ...
 
-        // 3. PASO FINAL: AHORA SÍ, BORRAMOS AL USUARIO
-        // Como ya no hay nada que apunte a él, la base de datos permitirá el borrado.
+        // PASO FINAL: AHORA SÍ, BORRAMOS AL USUARIO
         System.out.println("==> Procediendo a eliminar el usuario ID: " + id);
         usuarioRepository.delete(usuario);
         System.out.println("==> Usuario eliminado con éxito.");

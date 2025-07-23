@@ -1,13 +1,21 @@
 package com.barbersync.api.features.usuario;
 
+import com.barbersync.api.features.rol.Rol;
+import com.barbersync.api.features.rol.RolRepository;
 import com.barbersync.api.features.usuario.dto.UsuarioRequest;
 import com.barbersync.api.features.usuario.dto.UsuarioResponse;
+import com.barbersync.api.shared.exceptions.RecursoNoEncontradoException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
 @Component
 public class UsuarioMapper {
+    private final RolRepository rolRepository;
+
+    public UsuarioMapper(RolRepository rolRepository) {
+        this.rolRepository = rolRepository;
+    }
 
     public Usuario toEntity(UsuarioRequest request) {
         Usuario usuario = new Usuario();
@@ -16,9 +24,17 @@ public class UsuarioMapper {
         usuario.setPrimerApellido(request.getPrimerApellido());
         usuario.setSegundoApellido(request.getSegundoApellido());
         usuario.setCorreo(request.getCorreo());
-        usuario.setContrasena(request.getContrasena()); // ⚠️ será reemplazada por hash en el service
-        usuario.setRolId(request.getRolId());
+        usuario.setContrasena(request.getContrasena()); // Hash se aplicará en el servicio
         usuario.setFechaRegistro(LocalDate.now());
+
+        // La línea usuario.setRolId() se ha eliminado.
+
+        // Lógica perfecta para asignar el rol
+        if (request.getRolId() != null) {
+            Rol rol = rolRepository.findById(request.getRolId())
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Rol no encontrado con ID: " + request.getRolId()));
+            usuario.setRol(rol);
+        }
         return usuario;
     }
 
