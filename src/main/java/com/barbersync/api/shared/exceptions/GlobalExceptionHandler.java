@@ -70,4 +70,18 @@ public class GlobalExceptionHandler {
         ex.printStackTrace(); // Es útil para depurar en la consola
         return new ResponseEntity<>("Ocurrió un error interno inesperado.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+
+
+    // ⭐ NUEVO MANEJADOR PARA CONFLICTOS DE LÓGICA DE NEGOCIO ⭐
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalStateException(IllegalStateException ex) {
+        Map<String, String> error = new HashMap<>();
+        String mensajeDeError = ex.getMessage(); // Esto capturará "Error: Esta cita ya tiene una reseña..."
+
+        System.out.println("--- 🛡️ CONFLICTO DE LÓGICA DETECTADO: " + mensajeDeError);
+
+        error.put("error", mensajeDeError);
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT); // 409 Conflict
+    }
 }

@@ -48,7 +48,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // ✅ ¡CAMBIO CLAVE! Añade la IP pública de tu frontend.
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://13.223.118.135"));
+        config.setAllowedOrigins(List.of("http://localhost:5173", "http://13.223.118.135",  "http://barbersync-app.ddns.net"));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
